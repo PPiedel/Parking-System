@@ -1,11 +1,13 @@
 package pl.yahoo.pawelpiedel.Parking.service.driver;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import pl.yahoo.pawelpiedel.Parking.domain.Driver;
 import pl.yahoo.pawelpiedel.Parking.repository.DriverRepository;
 
 import java.util.Optional;
 
+@Component
 public class DriverServiceImpl implements DriverService {
     private DriverRepository driverRepository;
 
