@@ -1,5 +1,7 @@
 package pl.yahoo.pawelpiedel.Parking.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
@@ -18,7 +20,8 @@ public class Driver {
     private DriverType driverType;
 
     @OneToMany(mappedBy = "driver")
-    private List<Parking> parkings;
+    @JsonBackReference
+    private List<Car> cars;
 
     public Long getId() {
         return id;
@@ -36,33 +39,28 @@ public class Driver {
         this.driverType = driverType;
     }
 
-    public List<Parking> getParkings() {
-        return parkings;
-    }
-
-    public void setParkings(List<Parking> parkings) {
-        this.parkings = parkings;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Driver driver = (Driver) o;
-        return driverType == driver.driverType &&
-                Objects.equals(parkings, driver.parkings);
+        return Objects.equals(id, driver.id) &&
+                driverType == driver.driverType &&
+                Objects.equals(cars, driver.cars);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(driverType, parkings);
+
+        return Objects.hash(id, driverType, cars);
     }
 
     @Override
     public String toString() {
         return "Driver{" +
-                "driverType=" + driverType +
-                ", parkings=" + parkings.stream().map(Object::toString).collect(Collectors.toList()) +
+                "id=" + id +
+                ", driverType=" + driverType +
+                ", cars=" + cars.stream().map(Car::toString).collect(Collectors.toList()) +
                 '}';
     }
 }

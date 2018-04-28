@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Component
 public class DriverServiceImpl implements DriverService {
-    private DriverRepository driverRepository;
+    private final DriverRepository driverRepository;
 
     @Autowired
     public DriverServiceImpl(DriverRepository driverRepository) {

@@ -15,9 +15,9 @@ public class Parking {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "driver_id")
+    @JoinColumn(name = "car_id")
     @JsonManagedReference
-    private Driver driver;
+    private Car car;
 
     @OneToOne
     private Place place;
@@ -39,12 +39,12 @@ public class Parking {
         this.id = id;
     }
 
-    public Driver getDriver() {
-        return driver;
+    public Car getCar() {
+        return car;
     }
 
-    public void setDriver(Driver driver) {
-        this.driver = driver;
+    public void setCar(Car car) {
+        this.car = car;
     }
 
     public Place getPlace() {
