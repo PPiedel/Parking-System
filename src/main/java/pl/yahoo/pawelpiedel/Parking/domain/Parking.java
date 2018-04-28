@@ -25,7 +25,7 @@ public class Parking {
     private Payment payment;
 
     @Column(name = "start_time")
-    private LocalDateTime startTime;
+    private LocalDateTime startTime = LocalDateTime.now();
 
     @Column(name = "stop_time")
     private LocalDateTime stopTime;
