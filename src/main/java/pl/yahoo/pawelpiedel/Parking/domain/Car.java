@@ -21,6 +21,7 @@ public class Car {
     @JsonManagedReference
     private Driver driver;
 
+    @Column(name = "registration_number", unique = true)
     private String registrationNumber;
 
     public Long getId() {
