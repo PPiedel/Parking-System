@@ -21,8 +21,8 @@ public class Car {
     @JsonManagedReference
     private Driver driver;
 
-    @Column(name = "registration_number", unique = true)
-    private String registrationNumber;
+    @Column(name = "license_plate_number", unique = true)
+    private String licensePlateNumber;
 
     public Long getId() {
         return Id;
@@ -32,12 +32,12 @@ public class Car {
         Id = id;
     }
 
-    public String getRegistrationNumber() {
-        return registrationNumber;
+    public String getLicensePlateNumber() {
+        return licensePlateNumber;
     }
 
-    public void setRegistrationNumber(String registrationNumber) {
-        this.registrationNumber = registrationNumber;
+    public void setLicensePlateNumber(String licensePlateNumber) {
+        this.licensePlateNumber = licensePlateNumber;
     }
 
     public List<Parking> getParkings() {
@@ -54,19 +54,19 @@ public class Car {
         if (o == null || getClass() != o.getClass()) return false;
         Car car = (Car) o;
         return Objects.equals(Id, car.Id) &&
-                Objects.equals(registrationNumber, car.registrationNumber);
+                Objects.equals(licensePlateNumber, car.licensePlateNumber);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(Id, registrationNumber);
+        return Objects.hash(Id, licensePlateNumber);
     }
 
     @Override
     public String toString() {
         return "Car{" +
                 "Id=" + Id +
-                ", registrationNumber='" + registrationNumber + '\'' +
+                ", licensePlateNumber='" + licensePlateNumber + '\'' +
                 '}';
     }
 }

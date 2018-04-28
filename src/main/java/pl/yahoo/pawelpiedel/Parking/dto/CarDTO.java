@@ -1,9 +1,9 @@
 package pl.yahoo.pawelpiedel.Parking.dto;
 
 public final class CarDTO {
-    private final String registrationNumber;
+    private final String licensePlateNumber;
 
-    public CarDTO(String registrationNumber) {
-        this.registrationNumber = registrationNumber;
+    public CarDTO(String licensePlateNumber) {
+        this.licensePlateNumber = licensePlateNumber;
     }
 }
