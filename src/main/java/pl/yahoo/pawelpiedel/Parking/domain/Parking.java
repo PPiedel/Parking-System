@@ -1,6 +1,7 @@
 package pl.yahoo.pawelpiedel.Parking.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import pl.yahoo.pawelpiedel.Parking.domain.payment.Payment;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

@@ -1,4 +1,6 @@
-package pl.yahoo.pawelpiedel.Parking.domain;
+package pl.yahoo.pawelpiedel.Parking.domain.payment;
+
+import pl.yahoo.pawelpiedel.Parking.domain.Parking;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -15,6 +17,14 @@ public class Payment {
 
     @Embedded
     private Money money;
+
+    public Payment() { // required by Hibernate
+    }
+
+    public Payment(Parking parking, Money money) {
+        this.parking = parking;
+        this.money = money;
+    }
 
     public Long getId() {
         return id;

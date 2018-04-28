@@ -1,26 +1,26 @@
-package pl.yahoo.pawelpiedel.Parking.domain;
+package pl.yahoo.pawelpiedel.Parking.domain.payment;
 
 import javax.persistence.Embeddable;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Objects;
 
 @Embeddable
 public final class Money {
     public static final Currency DEFAULT_CURRENCY = Currency.getInstance("PLN");
-    private final BigInteger amount;
+    private final BigDecimal amount;
     private final Currency currency;
 
-    public Money(BigInteger amount, Currency currency) {
+    public Money(BigDecimal amount, Currency currency) {
         this.amount = amount;
         this.currency = currency;
     }
 
-    private Money(BigInteger amount) {
+    public Money(BigDecimal amount) {
         this(amount, DEFAULT_CURRENCY);
     }
 
-    public BigInteger getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
