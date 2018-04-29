@@ -1,6 +1,6 @@
 package pl.yahoo.pawelpiedel.Parking.domain.payment;
 
-import pl.yahoo.pawelpiedel.Parking.domain.Parking;
+import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 
 import javax.persistence.*;
 import java.util.Objects;

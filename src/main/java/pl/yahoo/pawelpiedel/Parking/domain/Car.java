@@ -2,6 +2,7 @@ package pl.yahoo.pawelpiedel.Parking.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
+import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
