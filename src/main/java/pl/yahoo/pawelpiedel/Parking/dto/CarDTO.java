@@ -3,7 +3,7 @@ package pl.yahoo.pawelpiedel.Parking.dto;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-public final class CarDTO {
+public class CarDTO {
     @NotNull
     @NotEmpty
     private String licensePlateNumber;
