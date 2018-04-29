@@ -1,8 +1,10 @@
 package pl.yahoo.pawelpiedel.Parking.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,10 +21,20 @@ public class Car {
     @ManyToOne()
     @JoinColumn(name = "driver_id")
     @JsonManagedReference
+    @NotNull
     private Driver driver;
 
     @Column(name = "license_plate_number", unique = true)
+    @NotNull
     private String licensePlateNumber;
+
+    public Car() { //required by Hibernate
+    }
+
+    public Car(Driver driver, String licensePlateNumber) {
+        this.driver = driver;
+        this.licensePlateNumber = licensePlateNumber;
+    }
 
     public Long getId() {
         return Id;

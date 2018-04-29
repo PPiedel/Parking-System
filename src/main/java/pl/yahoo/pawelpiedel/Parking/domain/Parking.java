@@ -2,6 +2,7 @@ package pl.yahoo.pawelpiedel.Parking.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import pl.yahoo.pawelpiedel.Parking.domain.payment.Payment;
+import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -22,7 +23,7 @@ public class Parking {
     @OneToOne
     private Place place;
 
-    @OneToOne
+    @OneToOne(mappedBy = "parking", cascade = CascadeType.ALL)
     private Payment payment;
 
     @Column(name = "start_time")
