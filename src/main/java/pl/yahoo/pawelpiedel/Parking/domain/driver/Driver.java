@@ -1,8 +1,10 @@
-package pl.yahoo.pawelpiedel.Parking.domain;
+package pl.yahoo.pawelpiedel.Parking.domain.driver;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import pl.yahoo.pawelpiedel.Parking.domain.Car;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -17,11 +19,16 @@ public class Driver {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "driver_type")
+    @NotNull
     private DriverType driverType;
 
-    @OneToMany(mappedBy = "driver")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "driver")
     @JsonBackReference
     private List<Car> cars;
+
+    public Driver(@NotNull DriverType driverType) {
+        this.driverType = driverType;
+    }
 
     public Long getId() {
         return id;
@@ -37,6 +44,14 @@ public class Driver {
 
     public void setDriverType(DriverType driverType) {
         this.driverType = driverType;
+    }
+
+    public List<Car> getCars() {
+        return cars;
+    }
+
+    public void setCars(List<Car> cars) {
+        this.cars = cars;
     }
 
     @Override
