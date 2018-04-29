@@ -21,15 +21,15 @@ public class PlaceServiceImplTest {
     private PlaceRepository placeRepository;
 
     @Test
-    public void isPlaceAvailableShouldReturnFalse() {
+    public void isAnyPlaceAvailable_AllPlacesNotAvailable_FalseReturned() {
         //given
         when(placeRepository.findByPlaceStatusIs(PlaceStatus.AVAILABLE)).thenReturn(Collections.emptyList());
 
         //when
-        boolean isPlaceAvailable = placeService.isPlaceAvailable();
+        boolean isAnyPlaceAvailable = placeService.isAnyPlaceAvailable();
 
         //then
-        assertFalse(isPlaceAvailable);
+        assertFalse(isAnyPlaceAvailable);
     }
 
     @TestConfiguration

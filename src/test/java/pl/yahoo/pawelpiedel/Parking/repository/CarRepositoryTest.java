@@ -25,7 +25,7 @@ public class CarRepositoryTest {
     private TestEntityManager testEntityManager;
 
     @Test
-    public void whenDriverWithCarSavedFindByLicensePlateNumberShouldReturnCar() {
+    public void findCarByLicensePlate_CarSavedInDB_CarReturned() {
         //given
         Driver driver = new Driver(DriverType.REGULAR);
         String testPlate = "XYZ21";
@@ -42,7 +42,7 @@ public class CarRepositoryTest {
     }
 
     @Test
-    public void whenCarNotExistFindByLicensePlateNumberShouldReturnNull() {
+    public void findCarByLicensePlate_CarNotSavedInDB_NullReturned() {
         //given
         String notExistingPlate = "XYZ21";
 

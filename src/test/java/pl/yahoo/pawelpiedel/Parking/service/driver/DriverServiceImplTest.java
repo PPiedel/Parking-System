@@ -26,7 +26,7 @@ public class DriverServiceImplTest {
     private DriverRepository driverRepository;
 
     @Test
-    public void findByIdShouldReturnOptionalWithValue() {
+    public void findDriver_DriverExists_OptionalWithValueReturned() {
         //given
         Driver testDriver = new Driver(DriverType.REGULAR);
         long testId = 1L;
@@ -42,7 +42,7 @@ public class DriverServiceImplTest {
     }
 
     @Test
-    public void findByIdShouldReturnEmptyOptional() {
+    public void findDriver_DriverNotExists_EmptyOptionalReturned() {
         //given
         long notExistingId = 9999L;
 

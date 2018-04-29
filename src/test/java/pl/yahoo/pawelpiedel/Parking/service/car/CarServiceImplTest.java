@@ -34,7 +34,7 @@ public class CarServiceImplTest {
     }
 
     @Test
-    public void whenCarSavedThenFindByLicenceNumberShouldReturnCar() {
+    public void findCarByLicenseNumber_CarExists_CarReturned() {
         //given
         String testLicencePlate = "XYZ123";
         when(carRepository.findByLicensePlateNumber(testLicencePlate)).thenReturn(carMock);
@@ -47,7 +47,7 @@ public class CarServiceImplTest {
     }
 
     @Test
-    public void whenCarDoesntExistThenFindByLicenceNumberShouldReturnNull() {
+    public void findCarByLicenseNumber_CarNotExists_NullReturned() {
         //given no car
         String testLicencePlate = "XYZ123";
 
