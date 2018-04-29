@@ -1,18 +1,23 @@
 package pl.yahoo.pawelpiedel.Parking.service.place;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.junit4.SpringRunner;
+import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
 import pl.yahoo.pawelpiedel.Parking.repository.PlaceRepository;
 
 import java.util.Collections;
+import java.util.List;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+@RunWith(SpringRunner.class)
 public class PlaceServiceImplTest {
     @Autowired
     private PlaceService placeService;
@@ -21,15 +26,15 @@ public class PlaceServiceImplTest {
     private PlaceRepository placeRepository;
 
     @Test
-    public void isAnyPlaceAvailable_AllPlacesNotAvailable_FalseReturned() {
+    public void getAvailablePlaces_PlaceNotAvailable_EmptyListReturned() {
         //given
         when(placeRepository.findByPlaceStatusIs(PlaceStatus.AVAILABLE)).thenReturn(Collections.emptyList());
 
         //when
-        boolean isAnyPlaceAvailable = placeService.isAnyPlaceAvailable();
+        List<Place> availablePlaces = placeService.getPlacesWithStatus(PlaceStatus.AVAILABLE);
 
         //then
-        assertFalse(isAnyPlaceAvailable);
+        assertTrue(availablePlaces.isEmpty());
     }
 
     @TestConfiguration
