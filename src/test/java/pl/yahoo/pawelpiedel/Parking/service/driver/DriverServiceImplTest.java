@@ -7,7 +7,8 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
-import pl.yahoo.pawelpiedel.Parking.domain.Driver;
+import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
+import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
 import pl.yahoo.pawelpiedel.Parking.repository.DriverRepository;
 
 import java.util.Optional;
@@ -27,7 +28,7 @@ public class DriverServiceImplTest {
     @Test
     public void findByIdShouldReturnOptionalWithValue() {
         //given
-        Driver testDriver = new Driver();
+        Driver testDriver = new Driver(DriverType.REGULAR);
         long testId = 1L;
         testDriver.setId(testId);
         when(driverRepository.findById(testId)).thenReturn(Optional.of(testDriver));
