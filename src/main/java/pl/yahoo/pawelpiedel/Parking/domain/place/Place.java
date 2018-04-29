@@ -1,4 +1,4 @@
-package pl.yahoo.pawelpiedel.Parking.domain;
+package pl.yahoo.pawelpiedel.Parking.domain.place;
 
 import javax.persistence.*;
 import java.util.Objects;
