@@ -13,6 +13,7 @@ public class Payment {
     private Long id;
 
     @OneToOne
+    @JoinColumn(name = "parking_id")
     private Parking parking;
 
     @Embedded

@@ -28,7 +28,7 @@ public class Parking {
     @NotNull
     private Place place;
 
-    @OneToOne(mappedBy = "parking", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "parking", cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
 
     @Column(name = "start_time")
