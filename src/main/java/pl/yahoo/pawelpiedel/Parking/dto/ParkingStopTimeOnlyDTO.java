@@ -1,17 +1,20 @@
 package pl.yahoo.pawelpiedel.Parking.dto;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-public class ParkingStopTimeDTO {
+public class ParkingStopTimeOnlyDTO {
     @NotNull
     @NotEmpty
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private String stopTime;
 
-    public ParkingStopTimeDTO() {
+    public ParkingStopTimeOnlyDTO() {
     }
 
-    public ParkingStopTimeDTO(@NotNull @NotEmpty String stopTime) {
+    public ParkingStopTimeOnlyDTO(@NotNull @NotEmpty String stopTime) {
         this.stopTime = stopTime;
     }
 

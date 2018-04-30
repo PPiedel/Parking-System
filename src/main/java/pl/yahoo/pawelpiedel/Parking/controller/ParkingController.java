@@ -14,7 +14,7 @@ import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
 import pl.yahoo.pawelpiedel.Parking.dto.EntityDTOMapper;
-import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopTimeDTO;
+import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopTimeOnlyDTO;
 import pl.yahoo.pawelpiedel.Parking.service.car.CarService;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingNotFoundException;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingService;
@@ -66,8 +66,8 @@ public class ParkingController {
     }
 
     @PatchMapping(value = "/{id}")
-    public ResponseEntity<?> stopParkingMeter(@RequestBody @Valid @NotNull ParkingStopTimeDTO parkingStopTimeDTO, @PathVariable("id") Long id) {
-        LocalDateTime localDateTime = LocalDateTime.parse(parkingStopTimeDTO.getStopTime());
+    public ResponseEntity<?> stopParkingMeter(@RequestBody @Valid @NotNull ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO, @PathVariable("id") Long id) {
+        LocalDateTime localDateTime = LocalDateTime.parse(parkingStopTimeOnlyDTO.getStopTime());
         try {
             Parking updated = parkingService.save(localDateTime, id);
             logger.debug("Parking after update : " + updated);
