@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,8 +26,9 @@ import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
 import pl.yahoo.pawelpiedel.Parking.dto.EntityDTOMapper;
-import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopTimeDTO;
+import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopTimeOnlyDTO;
 import pl.yahoo.pawelpiedel.Parking.service.car.CarService;
+import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingNotFoundException;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingService;
 import pl.yahoo.pawelpiedel.Parking.service.place.PlaceService;
 
@@ -47,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ParkingControllerTest {
+    private static final Logger logger = LoggerFactory.getLogger(ParkingControllerTest.class);
     private static final String API_BASE_URL = "/api/parking";
     @Autowired
     MockMvc mockMvc;
@@ -206,14 +209,15 @@ public class ParkingControllerTest {
         //given
         Long testId = 1L;
         LocalDateTime localDateTime = LocalDateTime.now();
-        ParkingStopTimeDTO parkingStopTimeDTO = new ParkingStopTimeDTO(localDateTime.toString());
+
+        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(localDateTime.toString());
         when(parkingService.save(any(LocalDateTime.class), eq(testId))).thenReturn(parkingMock);
 
         //when
         ResultActions resultActions = mockMvc.perform(
                 patch(API_BASE_URL + "/" + testId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(parkingStopTimeDTO)));
+                        .content(asJsonString(parkingStopTimeOnlyDTO)));
 
         //then
         resultActions
@@ -221,23 +225,92 @@ public class ParkingControllerTest {
 
     }
 
-    static class ClassOrSubclassMatcher<T> implements ArgumentMatcher<Class<T>> {
+    @Test
+    public void stopParkMeter_ParkingNotExist_NotFoundReturned() throws Exception {
+        //given
+        Long notExistingId = 999L;
+        LocalDateTime localDateTime = LocalDateTime.now();
+        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(localDateTime.toString());
+        when(parkingService.save(any(LocalDateTime.class), eq(notExistingId))).thenThrow(ParkingNotFoundException.class);
 
-        private final Class<T> targetClass;
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                patch(API_BASE_URL + "/" + notExistingId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(parkingStopTimeOnlyDTO)));
 
-        public ClassOrSubclassMatcher(Class<T> targetClass) {
-            this.targetClass = targetClass;
-        }
+        //then
+        resultActions
+                .andExpect(status().isNotFound());
 
-        @Override
-        public boolean matches(Class<T> obj) {
-            if (obj != null) {
-                if (obj instanceof Class) {
-                    return targetClass.isAssignableFrom(obj);
-                }
-            }
-            return false;
-        }
+    }
+
+    @Test
+    public void stopParkMeter_EmptyJSONPassed_ClientErrorReturned() throws Exception {
+        //given
+        Long anyId = 1L;
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                patch(API_BASE_URL + "/" + anyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString("")));
+
+        //then
+        resultActions
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void stopParkMeter_NullDateTimePassed_ClientErrorReturned() throws Exception {
+        //given
+        Long anyId = 1L;
+        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(null);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                patch(API_BASE_URL + "/" + anyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString("")));
+
+        //then
+        resultActions
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void stopParkMeter_EmptyDateTimePassed_ClientErrorReturned() throws Exception {
+        //given
+        Long anyId = 1L;
+        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO("");
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                patch(API_BASE_URL + "/" + anyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString("")));
+
+        //then
+        resultActions
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void stopParkMeter_DateTimeInWrongFormatPassed_ClientErrorReturned() throws Exception {
+        //given
+        Long anyId = 1L;
+        String dateTime = "1994-02-02'T'";
+        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(dateTime);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                patch(API_BASE_URL + "/" + anyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString("")));
+
+        //then
+        resultActions
+                .andExpect(status().is4xxClientError());
     }
 
     @TestConfiguration
