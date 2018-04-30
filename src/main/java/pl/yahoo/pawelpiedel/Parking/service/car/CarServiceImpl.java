@@ -16,7 +16,7 @@ public class CarServiceImpl implements CarService {
 
 
     @Override
-    public Car findByLicenceNumber(String licenceNumber) {
+    public Car findByLicencePlateNumber(String licenceNumber) {
         return carRepository.findByLicensePlateNumber(licenceNumber);
     }
 }

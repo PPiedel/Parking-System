@@ -31,7 +31,7 @@ public class PlaceServiceImplTest {
         when(placeRepository.findByPlaceStatusIs(PlaceStatus.AVAILABLE)).thenReturn(Collections.emptyList());
 
         //when
-        List<Place> availablePlaces = placeService.getPlacesWithStatus(PlaceStatus.AVAILABLE);
+        List<Place> availablePlaces = placeService.getAvailablePlaces();
 
         //then
         assertTrue(availablePlaces.isEmpty());

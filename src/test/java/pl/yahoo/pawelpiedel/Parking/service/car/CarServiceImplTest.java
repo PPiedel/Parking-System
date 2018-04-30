@@ -40,7 +40,7 @@ public class CarServiceImplTest {
         when(carRepository.findByLicensePlateNumber(testLicencePlate)).thenReturn(carMock);
 
         //when
-        Car found = carService.findByLicenceNumber(testLicencePlate);
+        Car found = carService.findByLicencePlateNumber(testLicencePlate);
 
         //then
         assertEquals(carMock, found);
@@ -52,7 +52,7 @@ public class CarServiceImplTest {
         String testLicencePlate = "XYZ123";
 
         //when
-        Car found = carService.findByLicenceNumber(testLicencePlate);
+        Car found = carService.findByLicencePlateNumber(testLicencePlate);
 
         //then
         assertNull(found);

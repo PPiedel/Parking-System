@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -19,22 +22,30 @@ import org.springframework.test.web.servlet.ResultActions;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
-import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
+import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
 import pl.yahoo.pawelpiedel.Parking.dto.EntityDTOMapper;
+import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopTimeDTO;
 import pl.yahoo.pawelpiedel.Parking.service.car.CarService;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingService;
 import pl.yahoo.pawelpiedel.Parking.service.place.PlaceService;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(ParkingController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class ParkingControllerTest {
     private static final String API_BASE_URL = "/api/parking";
     @Autowired
@@ -55,17 +66,20 @@ public class ParkingControllerTest {
     @Mock
     private Parking parkingMock;
 
-    public static String asJsonString(final Object obj) {
+    @Mock
+    private Place placeMock;
+
+    @Before
+    public void before() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    private static String asJsonString(final Object obj) {
         try {
             return new ObjectMapper().writeValueAsString(obj);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Before
-    public void before() {
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -90,9 +104,37 @@ public class ParkingControllerTest {
     }
 
     @Test
-    public void startParkMeter_CarWithoutLicensePlateNumber_ClientErrorReturned() throws Exception {
+    public void startParkMeter_ValidCarDTOPassed_CreatedStatusWithLocationReturned() throws Exception {
+        //given
+        String licensePlateNumber = "XYZ123";
+        Car car = new Car(driverMock, licensePlateNumber);
+        CarDTO carDTO = new CarDTO(licensePlateNumber);
+        when(parkingService.getOngoingParkings(car)).thenReturn(Collections.emptyList());
+        when(placeService.getAvailablePlaces()).thenReturn(Collections.singletonList(placeMock));
+        when(placeService.getNextFreePlace()).thenReturn(placeMock);
+        Parking parking = new Parking(car, placeMock);
+        Long parkingId = 1L;
+        parking.setId(parkingId);
+        when(parkingService.save(ArgumentMatchers.any())).thenReturn(parking);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                post(API_BASE_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(carDTO)));
+
+        //then
+        resultActions
+                .andExpect(status().isCreated())
+                .andExpect(header().string("location", containsString("http://localhost" + API_BASE_URL + "/" + parkingId)));
+
+    }
+
+    @Test
+    public void startParkMeter_CarDTOWithEmptyLicensePlateNumber_ClientErrorReturned() throws Exception {
         //given
         CarDTO carDTO = new CarDTO();
+        carDTO.setLicensePlateNumber("");
 
         //when
         ResultActions resultActions = mockMvc.perform(
@@ -106,7 +148,7 @@ public class ParkingControllerTest {
     }
 
     @Test
-    public void startParkMeter_CarNullLicensePlateNumber_ClientErrorReturned() throws Exception {
+    public void startParkMeter_CarDTOWithNullLicensePlateNumber_ClientErrorReturned() throws Exception {
         //given
         String nullLicensePlateNumber = null;
         CarDTO carDTO = new CarDTO(nullLicensePlateNumber);
@@ -123,6 +165,22 @@ public class ParkingControllerTest {
     }
 
     @Test
+    public void startParkMeter_EmptyJSONPassed_ClientErrorReturned() throws Exception {
+        //given
+        String emptyJSON = "";
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                post(API_BASE_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(emptyJSON));
+
+        //then
+        resultActions
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
     public void startParkMeter_NoPlacesAvailable_BadRequestReturned() throws Exception {
         //given
         String licensePlateNumber = "XYZ123";
@@ -130,7 +188,7 @@ public class ParkingControllerTest {
         CarDTO carDTO = new CarDTO(licensePlateNumber);
         List<Parking> openedParkings = Collections.singletonList(parkingMock);
         when(parkingService.getOngoingParkings(car)).thenReturn(Collections.emptyList());
-        when(placeService.getPlacesWithStatus(PlaceStatus.AVAILABLE)).thenReturn(Collections.emptyList());
+        when(placeService.getAvailablePlaces()).thenReturn(Collections.emptyList());
 
         //when
         ResultActions resultActions = mockMvc.perform(
@@ -143,6 +201,45 @@ public class ParkingControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    public void stopParkMeter_ValidParkingStopTimeDTOPassed_ParkingInDb_EntityUpdated() throws Exception {
+        //given
+        Long testId = 1L;
+        LocalDateTime localDateTime = LocalDateTime.now();
+        ParkingStopTimeDTO parkingStopTimeDTO = new ParkingStopTimeDTO(localDateTime.toString());
+        when(parkingService.save(any(LocalDateTime.class), eq(testId))).thenReturn(parkingMock);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                patch(API_BASE_URL + "/" + testId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(parkingStopTimeDTO)));
+
+        //then
+        resultActions
+                .andExpect(status().isOk());
+
+    }
+
+    static class ClassOrSubclassMatcher<T> implements ArgumentMatcher<Class<T>> {
+
+        private final Class<T> targetClass;
+
+        public ClassOrSubclassMatcher(Class<T> targetClass) {
+            this.targetClass = targetClass;
+        }
+
+        @Override
+        public boolean matches(Class<T> obj) {
+            if (obj != null) {
+                if (obj instanceof Class) {
+                    return targetClass.isAssignableFrom(obj);
+                }
+            }
+            return false;
+        }
+    }
+
     @TestConfiguration
     static class MoviesControllerTestConfiguration {
         @Bean
@@ -151,8 +248,8 @@ public class ParkingControllerTest {
         }
 
         @Bean
-        EntityDTOMapper entityDTOMapper(ModelMapper modelMapper) {
-            return new EntityDTOMapper(modelMapper);
+        EntityDTOMapper entityDTOMapper(ModelMapper modelMapper, CarService carService) {
+            return new EntityDTOMapper(modelMapper, carService);
         }
     }
 }

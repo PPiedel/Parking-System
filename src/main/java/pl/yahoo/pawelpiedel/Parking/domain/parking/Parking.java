@@ -43,6 +43,15 @@ public class Parking {
     @NotNull
     private ParkingStatus parkingStatus;
 
+    public Parking() {
+    }
+
+    public Parking(@NotNull Car car, @NotNull Place place) {
+        this.car = car;
+        this.place = place;
+        startTime = LocalDateTime.now();
+        parkingStatus = ParkingStatus.ONGOING;
+    }
 
     public Long getId() {
         return id;

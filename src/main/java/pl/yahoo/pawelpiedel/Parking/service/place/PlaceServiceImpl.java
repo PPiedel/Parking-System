@@ -20,7 +20,13 @@ public final class PlaceServiceImpl implements PlaceService {
 
 
     @Override
-    public List<Place> getPlacesWithStatus(PlaceStatus placeStatus) {
-        return placeRepository.findByPlaceStatusIs(placeStatus);
+    public List<Place> getAvailablePlaces() {
+        return placeRepository.findByPlaceStatusIs(PlaceStatus.AVAILABLE);
+    }
+
+    @Override
+    public Place getNextFreePlace() {
+        List<Place> freePlaces = getAvailablePlaces();
+        return freePlaces.get(0);
     }
 }

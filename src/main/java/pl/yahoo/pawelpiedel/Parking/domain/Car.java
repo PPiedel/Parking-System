@@ -61,6 +61,14 @@ public class Car {
         this.parkings = parkings;
     }
 
+    public Driver getDriver() {
+        return driver;
+    }
+
+    public void setDriver(Driver driver) {
+        this.driver = driver;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
