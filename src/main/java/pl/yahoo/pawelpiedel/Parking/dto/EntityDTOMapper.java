@@ -2,8 +2,6 @@ package pl.yahoo.pawelpiedel.Parking.dto;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
 
@@ -20,11 +18,5 @@ public class EntityDTOMapper {
         return modelMapper.map(carDTO, Car.class);
     }
 
-    @Configuration
-    static class MapperConfiguration {
-        @Bean
-        public ModelMapper modelMapper() {
-            return new ModelMapper();
-        }
-    }
+
 }
