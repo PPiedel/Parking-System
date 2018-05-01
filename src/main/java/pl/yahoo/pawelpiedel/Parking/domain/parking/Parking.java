@@ -6,7 +6,6 @@ import pl.yahoo.pawelpiedel.Parking.domain.payment.Payment;
 import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -18,21 +17,18 @@ public class Parking {
     @GeneratedValue
     private Long id;
 
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name = "car_id")
     @JsonManagedReference
-    @NotNull
     private Car car;
 
     @OneToOne
-    @NotNull
     private Place place;
 
     @OneToOne(mappedBy = "parking", cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
 
     @Column(name = "start_time")
-    @NotNull
     private LocalDateTime startTime;
 
     @Column(name = "stop_time")
@@ -40,13 +36,12 @@ public class Parking {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "driver_type")
-    @NotNull
     private ParkingStatus parkingStatus;
 
     public Parking() {
     }
 
-    public Parking(@NotNull Car car, @NotNull Place place) {
+    public Parking(Car car, Place place) {
         this.car = car;
         this.place = place;
         startTime = LocalDateTime.now();

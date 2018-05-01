@@ -16,7 +16,7 @@ public class Car {
     @GeneratedValue
     private Long Id;
 
-    @OneToMany(mappedBy = "car")
+    @OneToMany(mappedBy = "car", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Parking> parkings;
 
     @ManyToOne()
