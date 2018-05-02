@@ -112,7 +112,7 @@ public class ParkingControllerIntegrationTest {
     }
 
     @Test
-    public void stopParkMeter_ValidDateTimePassed_ParkingExist_ParkingStopped() throws Exception {
+    public void stopParkMeter_ValidDateTimeDTOPassed_ParkingExist_ParkingStopped() throws Exception {
         //given
         Place place = new Place(PlaceStatus.AVAILABLE);
         placeService.save(place);
@@ -146,7 +146,73 @@ public class ParkingControllerIntegrationTest {
         logger.info(stopResult.getResponse().getContentAsString());
 
         assertEquals(1, placeService.getAvailablePlaces().size());
+    }
 
+    @Test
+    public void stopParkMeter_OnlyDatePassed_ParkingExist_ClientErrorReturned() throws Exception {
+        //given
+        Place place = new Place(PlaceStatus.AVAILABLE);
+        placeService.save(place);
+
+        Driver driver = new Driver(DriverType.REGULAR);
+        String licensePlateNumber = "ABC123";
+        Car car = new Car(driver, licensePlateNumber);
+        car.setDriver(driver);
+        driver.setCars(Collections.singletonList(car));
+        driverService.save(driver);
+
+        CarDTO carDTO = new CarDTO(licensePlateNumber);
+        MvcResult postResult = mockMvc.perform(post(API_BASE_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(carDTO)))
+                .andReturn();
+        String location = postResult.getResponse().getHeader("Location");
+
+        //when
+        String onlyDate = "2018-12-03";
+        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(onlyDate);
+        ResultActions resultActions = mockMvc.perform(patch(location)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(parkingStopTimeOnlyDTO)));
+
+        //then
+        MvcResult stopResult = resultActions
+                .andExpect(status().is4xxClientError())
+                .andReturn();
+
+    }
+
+    @Test
+    public void stopParkMeter_EmptyDateTimePassed_ParkingExist_ClientError() throws Exception {
+        //given
+        Place place = new Place(PlaceStatus.AVAILABLE);
+        placeService.save(place);
+
+        Driver driver = new Driver(DriverType.REGULAR);
+        String licensePlateNumber = "ABC123";
+        Car car = new Car(driver, licensePlateNumber);
+        car.setDriver(driver);
+        driver.setCars(Collections.singletonList(car));
+        driverService.save(driver);
+
+        CarDTO carDTO = new CarDTO(licensePlateNumber);
+        MvcResult postResult = mockMvc.perform(post(API_BASE_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(carDTO)))
+                .andReturn();
+        String location = postResult.getResponse().getHeader("Location");
+
+        //when
+        String onlyDate = "";
+        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(onlyDate);
+        ResultActions resultActions = mockMvc.perform(patch(location)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(parkingStopTimeOnlyDTO)));
+
+        //then
+        MvcResult stopResult = resultActions
+                .andExpect(status().is4xxClientError())
+                .andReturn();
 
     }
 }
