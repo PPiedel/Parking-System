@@ -24,4 +24,9 @@ public class CarServiceImpl implements CarService {
     public Car save(Car car) {
         return carRepository.save(car);
     }
+
+    @Override
+    public boolean isUnknown(Car car) {
+        return car.getDriver() == null;
+    }
 }

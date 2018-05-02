@@ -1,5 +1,6 @@
 package pl.yahoo.pawelpiedel.Parking.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
@@ -18,6 +19,7 @@ public class Car {
     private Long Id;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Parking> parkings;
 
     @ManyToOne()

@@ -8,4 +8,6 @@ public interface CarService {
     Car findByLicencePlateNumber(String licenceNumber);
 
     Car save(Car car);
+
+    boolean isUnknown(Car car);
 }

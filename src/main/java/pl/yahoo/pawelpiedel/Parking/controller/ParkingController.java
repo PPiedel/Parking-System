@@ -12,6 +12,7 @@ import pl.yahoo.pawelpiedel.Parking.domain.Car;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
+import pl.yahoo.pawelpiedel.Parking.domain.parking.ParkingStatus;
 import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
@@ -62,11 +63,13 @@ public class ParkingController {
             }
 
             Place place = findPlaceForParking();
+            place.setPlaceStatus(PlaceStatus.TAKEN);
 
             Parking parking = new Parking(car, place);
+            parking.setParkingStatus(ParkingStatus.ONGOING);
             car.addparking(parking);
 
-            if (car.getDriver() == null) {
+            if (carService.isUnknown(car)) {
                 Driver newDriver = new Driver(DriverType.REGULAR);
                 newDriver.setCars(Collections.singletonList(car));
                 car.setDriver(newDriver);
@@ -85,9 +88,7 @@ public class ParkingController {
     }
 
     private Place findPlaceForParking() {
-        Place place = placeService.getNextFirstFreePlace();
-        place.setPlaceStatus(PlaceStatus.TAKEN);
-        return place;
+        return placeService.getNextFirstFreePlace();
     }
 
     private Parking getLastAddedParking(Car car) {
@@ -97,13 +98,20 @@ public class ParkingController {
     @PatchMapping(value = "/{id}")
     public ResponseEntity<?> stopParkingMeter(@RequestBody @Valid ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO, @PathVariable("id") Long id) {
         LocalDateTime localDateTime = LocalDateTime.parse(parkingStopTimeOnlyDTO.getStopTime());
+        Parking updated = new Parking();
         try {
-            Parking updated = parkingService.save(localDateTime, id);
-            logger.debug("Parking after update : " + updated);
+            updated.setId(id);
+            updated = parkingService.save(localDateTime, id);
+            updated.setParkingStatus(ParkingStatus.COMPLETED);
+            parkingService.save(updated);
+
+            Place parkingPlace = updated.getPlace();
+            placeService.freePlace(parkingPlace);
+
         } catch (ParkingNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok("Parking stopped");
+        return ResponseEntity.ok(updated);
     }
 
     private URI buildUri(Parking parking) {

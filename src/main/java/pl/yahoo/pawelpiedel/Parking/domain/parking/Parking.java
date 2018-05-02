@@ -22,7 +22,7 @@ public class Parking {
     @JsonManagedReference
     private Car car;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
     private Place place;
 
     @OneToOne(mappedBy = "parking", cascade = CascadeType.ALL, orphanRemoval = true)

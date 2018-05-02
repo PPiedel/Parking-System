@@ -12,4 +12,6 @@ public interface PlaceService {
     Place getNextFirstFreePlace();
 
     Place save(Place place);
+
+    Place freePlace(Place place);
 }

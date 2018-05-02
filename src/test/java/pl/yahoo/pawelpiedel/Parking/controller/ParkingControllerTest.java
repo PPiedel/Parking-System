@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -25,6 +26,7 @@ import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
+import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
 import pl.yahoo.pawelpiedel.Parking.dto.EntityDTOMapper;
 import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopTimeOnlyDTO;
@@ -50,6 +52,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ParkingControllerTest {
     private static final Logger logger = LoggerFactory.getLogger(ParkingControllerTest.class);
     private static final String API_BASE_URL = "/api/parking";
@@ -200,7 +203,6 @@ public class ParkingControllerTest {
         String licensePlateNumber = "XYZ123";
         Car car = new Car(driverMock, licensePlateNumber);
         CarDTO carDTO = new CarDTO(licensePlateNumber);
-        List<Parking> openedParkings = Collections.singletonList(parkingMock);
         when(parkingService.isCarAlreadyParked(car.getLicensePlateNumber())).thenReturn(false);
         when(placeService.getAvailablePlaces()).thenReturn(Collections.emptyList());
 
@@ -218,15 +220,20 @@ public class ParkingControllerTest {
     @Test
     public void stopParkMeter_ValidParkingStopTimeDTOPassed_ParkingInDb_EntityUpdated() throws Exception {
         //given
+        Driver driver = new Driver(DriverType.REGULAR);
+        String licensePlateNumber = "XYZ123";
+        Car car = new Car(driver, licensePlateNumber);
+        driver.setCars(Collections.singletonList(car));
         Long testId = 1L;
         LocalDateTime localDateTime = LocalDateTime.now();
+        Parking parking = new Parking(car, new Place(PlaceStatus.TAKEN));
+        parking.setId(testId);
 
         ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(localDateTime.toString());
-        when(parkingService.save(any(LocalDateTime.class), eq(testId))).thenReturn(parkingMock);
+        when(parkingService.save(any(LocalDateTime.class), eq(testId))).thenReturn(parking);
 
         //when
-        ResultActions resultActions = mockMvc.perform(
-                patch(API_BASE_URL + "/" + testId)
+        ResultActions resultActions = mockMvc.perform(patch(API_BASE_URL + "/" + testId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(parkingStopTimeOnlyDTO)));
 

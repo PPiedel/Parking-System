@@ -34,4 +34,10 @@ public final class PlaceServiceImpl implements PlaceService {
     public Place save(Place place) {
         return placeRepository.save(place);
     }
+
+    @Override
+    public Place freePlace(Place place) {
+        place.setPlaceStatus(PlaceStatus.AVAILABLE);
+        return save(place);
+    }
 }
