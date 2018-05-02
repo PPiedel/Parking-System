@@ -25,8 +25,13 @@ public final class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
-    public Place getNextFreePlace() {
+    public Place getNextFirstFreePlace() {
         List<Place> freePlaces = getAvailablePlaces();
         return freePlaces.get(0);
+    }
+
+    @Override
+    public Place save(Place place) {
+        return placeRepository.save(place);
     }
 }

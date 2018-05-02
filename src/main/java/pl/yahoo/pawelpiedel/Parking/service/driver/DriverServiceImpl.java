@@ -20,4 +20,9 @@ public class DriverServiceImpl implements DriverService {
     public Optional<Driver> findById(Long id) {
         return driverRepository.findById(id);
     }
+
+    @Override
+    public Driver save(Driver driver) {
+        return driverRepository.save(driver);
+    }
 }

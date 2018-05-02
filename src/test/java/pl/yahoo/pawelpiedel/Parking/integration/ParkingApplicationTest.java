@@ -1,4 +1,4 @@
-package pl.yahoo.pawelpiedel.Parking;
+package pl.yahoo.pawelpiedel.Parking.integration;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,7 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ParkingApplicationTests {
+public class ParkingApplicationTest {
 
 	@Test
 	public void contextLoads() {

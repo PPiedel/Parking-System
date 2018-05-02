@@ -39,7 +39,6 @@ public class EntityDTOMapperTest {
 
         //then
         assertEquals(carDTO.getLicensePlateNumber(), entity.getLicensePlateNumber());
-        assertEquals(DriverType.REGULAR, entity.getDriver().getDriverType());
         assertNull(entity.getId());
     }
 

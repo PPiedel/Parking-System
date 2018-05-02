@@ -26,6 +26,9 @@ public class Driver {
     @JsonBackReference
     private List<Car> cars;
 
+    public Driver() {
+    }
+
     public Driver(@NotNull DriverType driverType) {
         this.driverType = driverType;
     }

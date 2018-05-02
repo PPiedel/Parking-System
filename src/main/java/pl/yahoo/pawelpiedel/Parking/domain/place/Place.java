@@ -13,6 +13,13 @@ public class Place {
     @Column(name = "place_status")
     private PlaceStatus placeStatus;
 
+    public Place() {//required by Hibernate
+    }
+
+    public Place(PlaceStatus placeStatus) {
+        this.placeStatus = placeStatus;
+    }
+
     public Long getId() {
         return id;
     }

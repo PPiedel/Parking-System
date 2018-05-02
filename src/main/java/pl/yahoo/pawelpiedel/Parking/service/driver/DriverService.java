@@ -8,4 +8,6 @@ import java.util.Optional;
 @Service
 public interface DriverService {
     Optional<Driver> findById(Long id);
+
+    Driver save(Driver driver);
 }

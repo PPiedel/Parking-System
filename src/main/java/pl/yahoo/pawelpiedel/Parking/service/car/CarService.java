@@ -6,4 +6,6 @@ import pl.yahoo.pawelpiedel.Parking.domain.Car;
 @Service
 public interface CarService {
     Car findByLicencePlateNumber(String licenceNumber);
+
+    Car save(Car car);
 }

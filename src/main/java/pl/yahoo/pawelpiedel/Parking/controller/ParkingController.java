@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
+import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
+import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
@@ -16,14 +18,15 @@ import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
 import pl.yahoo.pawelpiedel.Parking.dto.EntityDTOMapper;
 import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopTimeOnlyDTO;
 import pl.yahoo.pawelpiedel.Parking.service.car.CarService;
+import pl.yahoo.pawelpiedel.Parking.service.driver.DriverService;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingNotFoundException;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingService;
 import pl.yahoo.pawelpiedel.Parking.service.place.PlaceService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -33,40 +36,66 @@ public class ParkingController {
     private final ParkingService parkingService;
     private final CarService carService;
     private final PlaceService placeService;
+    private final DriverService driverService;
     private final EntityDTOMapper entityDTOMapper;
 
-
     @Autowired
-    public ParkingController(ParkingService parkingService, CarService carService, PlaceService placeService, EntityDTOMapper entityDTOMapper) {
+    public ParkingController(ParkingService parkingService, CarService carService, PlaceService placeService, DriverService driverService, EntityDTOMapper entityDTOMapper) {
         this.parkingService = parkingService;
         this.carService = carService;
         this.placeService = placeService;
+        this.driverService = driverService;
         this.entityDTOMapper = entityDTOMapper;
     }
 
     @PostMapping
-    public ResponseEntity<?> startParkingMeter(@RequestBody @Valid @NotNull CarDTO carDTO) {
-        Car car = entityDTOMapper.asEntity(carDTO);
-
-        List<Parking> carOngoingParkings = parkingService.getOngoingParkings(car);
+    public ResponseEntity<?> startParkingMeter(@RequestBody @Valid CarDTO carDTO) {
         List<Place> availablePlaces = placeService.getAvailablePlaces();
-        if (!carOngoingParkings.isEmpty() || availablePlaces.isEmpty()) {
+
+        if (availablePlaces.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else {
-            Place place = placeService.getNextFreePlace();
-            place.setPlaceStatus(PlaceStatus.TAKEN);
+            Car car = entityDTOMapper.asEntity(carDTO);
 
-            Parking entity = new Parking(car, place);
-            Parking saved = parkingService.save(entity);
+            if (parkingService.isCarAlreadyParked(car.getLicensePlateNumber())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
 
-            URI location = buildUri(saved);
-            return ResponseEntity.created(location).build();
+            Place place = findPlaceForParking();
+
+            Parking parking = new Parking(car, place);
+            car.addparking(parking);
+
+            if (car.getDriver() == null) {
+                Driver newDriver = new Driver(DriverType.REGULAR);
+                newDriver.setCars(Collections.singletonList(car));
+                car.setDriver(newDriver);
+                Driver saved = driverService.save(newDriver);
+                URI location = buildUri(getLastAddedParking(saved.getCars().get(0)));
+                return ResponseEntity.created(location).build();
+
+            } else {
+                Car saved = carService.save(car);
+                URI location = buildUri(getLastAddedParking(saved));
+                return ResponseEntity.created(location).build();
+            }
+
         }
 
     }
 
+    private Place findPlaceForParking() {
+        Place place = placeService.getNextFirstFreePlace();
+        place.setPlaceStatus(PlaceStatus.TAKEN);
+        return place;
+    }
+
+    private Parking getLastAddedParking(Car car) {
+        return car.getParkings().get(car.getParkings().size() - 1);
+    }
+
     @PatchMapping(value = "/{id}")
-    public ResponseEntity<?> stopParkingMeter(@RequestBody @Valid @NotNull ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO, @PathVariable("id") Long id) {
+    public ResponseEntity<?> stopParkingMeter(@RequestBody @Valid ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO, @PathVariable("id") Long id) {
         LocalDateTime localDateTime = LocalDateTime.parse(parkingStopTimeOnlyDTO.getStopTime());
         try {
             Parking updated = parkingService.save(localDateTime, id);

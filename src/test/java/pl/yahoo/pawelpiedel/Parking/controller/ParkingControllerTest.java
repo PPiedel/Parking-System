@@ -22,12 +22,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
+import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
 import pl.yahoo.pawelpiedel.Parking.dto.EntityDTOMapper;
 import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopTimeOnlyDTO;
 import pl.yahoo.pawelpiedel.Parking.service.car.CarService;
+import pl.yahoo.pawelpiedel.Parking.service.driver.DriverService;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingNotFoundException;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingService;
 import pl.yahoo.pawelpiedel.Parking.service.place.PlaceService;
@@ -51,6 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ParkingControllerTest {
     private static final Logger logger = LoggerFactory.getLogger(ParkingControllerTest.class);
     private static final String API_BASE_URL = "/api/parking";
+
     @Autowired
     MockMvc mockMvc;
 
@@ -62,6 +65,9 @@ public class ParkingControllerTest {
 
     @MockBean
     private PlaceService placeService;
+
+    @MockBean
+    private DriverService driverService;
 
     @Mock
     private Driver driverMock;
@@ -92,7 +98,7 @@ public class ParkingControllerTest {
         Car car = new Car(driverMock, licensePlateNumber);
         CarDTO carDTO = new CarDTO(licensePlateNumber);
         List<Parking> openedParkings = Collections.singletonList(parkingMock);
-        when(parkingService.getOngoingParkings(car)).thenReturn(openedParkings);
+        when(parkingService.isCarAlreadyParked(car.getLicensePlateNumber())).thenReturn(true);
 
         //when
         ResultActions resultActions = mockMvc.perform(
@@ -110,15 +116,20 @@ public class ParkingControllerTest {
     public void startParkMeter_ValidCarDTOPassed_CreatedStatusWithLocationReturned() throws Exception {
         //given
         String licensePlateNumber = "XYZ123";
-        Car car = new Car(driverMock, licensePlateNumber);
+        Driver driver = new Driver(DriverType.REGULAR);
+        Car car = new Car(driver, licensePlateNumber);
+        driver.setCars(Collections.singletonList(car));
+
         CarDTO carDTO = new CarDTO(licensePlateNumber);
-        when(parkingService.getOngoingParkings(car)).thenReturn(Collections.emptyList());
+        when(parkingService.isCarAlreadyParked(car.getLicensePlateNumber())).thenReturn(false);
         when(placeService.getAvailablePlaces()).thenReturn(Collections.singletonList(placeMock));
-        when(placeService.getNextFreePlace()).thenReturn(placeMock);
+        when(placeService.getNextFirstFreePlace()).thenReturn(placeMock);
+        when(driverService.save(any())).thenReturn(driver);
         Parking parking = new Parking(car, placeMock);
         Long parkingId = 1L;
         parking.setId(parkingId);
-        when(parkingService.save(ArgumentMatchers.any())).thenReturn(parking);
+        car.setParkings(Collections.singletonList(parking));
+        when(carService.save(ArgumentMatchers.any())).thenReturn(car);
 
         //when
         ResultActions resultActions = mockMvc.perform(
@@ -190,7 +201,7 @@ public class ParkingControllerTest {
         Car car = new Car(driverMock, licensePlateNumber);
         CarDTO carDTO = new CarDTO(licensePlateNumber);
         List<Parking> openedParkings = Collections.singletonList(parkingMock);
-        when(parkingService.getOngoingParkings(car)).thenReturn(Collections.emptyList());
+        when(parkingService.isCarAlreadyParked(car.getLicensePlateNumber())).thenReturn(false);
         when(placeService.getAvailablePlaces()).thenReturn(Collections.emptyList());
 
         //when

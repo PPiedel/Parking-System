@@ -2,13 +2,11 @@ package pl.yahoo.pawelpiedel.Parking.service.parking;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pl.yahoo.pawelpiedel.Parking.domain.Car;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.ParkingStatus;
 import pl.yahoo.pawelpiedel.Parking.repository.ParkingRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -21,8 +19,8 @@ public class ParkingServiceImpl implements ParkingService {
     }
 
     @Override
-    public List<Parking> getOngoingParkings(Car car) {
-        return parkingRepository.findByCarAndParkingStatus(car, ParkingStatus.ONGOING);
+    public boolean isCarAlreadyParked(String licensePlateNumber) {
+        return parkingRepository.findByCarLicensePlateNumberAndParkingStatus(licensePlateNumber, ParkingStatus.ONGOING).size() > 0;
     }
 
     @Override

@@ -6,6 +6,7 @@ import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,7 +17,7 @@ public class Car {
     @GeneratedValue
     private Long Id;
 
-    @OneToMany(mappedBy = "car", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
     private List<Parking> parkings;
 
     @ManyToOne()
@@ -35,6 +36,13 @@ public class Car {
     public Car(Driver driver, String licensePlateNumber) {
         this.driver = driver;
         this.licensePlateNumber = licensePlateNumber;
+    }
+
+    public void addparking(Parking parking) {
+        if (parkings == null) {
+            parkings = new ArrayList<>();
+        }
+        parkings.add(parking);
     }
 
     public Long getId() {
