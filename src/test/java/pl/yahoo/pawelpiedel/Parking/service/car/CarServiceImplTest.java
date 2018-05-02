@@ -11,10 +11,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
+import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
+import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
 import pl.yahoo.pawelpiedel.Parking.repository.CarRepository;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -56,6 +59,27 @@ public class CarServiceImplTest {
 
         //then
         assertNull(found);
+    }
+
+    @Test
+    public void save_CarSaved_CarReturned() {
+        //given
+        Driver driver = new Driver(DriverType.REGULAR);
+        Long id = 1L;
+        driver.setId(id);
+        String licensePlateNumber = "XYZ1234";
+        Car saved = new Car(driver, licensePlateNumber);
+        saved.setId(id);
+        when(carRepository.save(any())).thenReturn(saved);
+
+        //when
+        Car entity = new Car(driver, licensePlateNumber);
+        Car car = carService.save(entity);
+
+        //then
+        assertEquals(id, car.getId());
+        assertEquals(licensePlateNumber, car.getLicensePlateNumber());
+        assertEquals(driver, car.getDriver());
     }
 
 

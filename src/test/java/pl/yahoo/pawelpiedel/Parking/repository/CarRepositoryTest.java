@@ -9,6 +9,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
+import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
+import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
+import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
 
 import java.util.Collections;
 
@@ -51,5 +54,34 @@ public class CarRepositoryTest {
 
         //then
         assertNull(found);
+    }
+
+    @Test
+    public void saveCar_updatedKnownCarPassed_CarInDBUpdated() {
+        //given
+        //add free place
+        Place place = new Place(PlaceStatus.AVAILABLE);
+        testEntityManager.persistAndFlush(place);
+
+        //add driver
+        Driver driver = new Driver(DriverType.REGULAR);
+        driver = testEntityManager.persistAndFlush(driver);
+
+        //add car to driver
+        String testPlate = "XYZ21";
+        Car car = new Car(driver, testPlate);
+        car = testEntityManager.persistAndFlush(car);
+
+        //when
+        //add parking to car
+        Parking parking = new Parking(car, place);
+        place.setPlaceStatus(PlaceStatus.TAKEN);
+        car.addparking(parking);
+        Car updated = carRepository.save(car);
+
+        assertEquals(1, carRepository.findAll().size());
+        assertEquals(1, updated.getParkings().size());
+        assertEquals(testPlate, updated.getLicensePlateNumber());
+
     }
 }
