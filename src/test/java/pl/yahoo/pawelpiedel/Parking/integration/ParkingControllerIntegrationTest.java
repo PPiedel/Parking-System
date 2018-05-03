@@ -26,6 +26,7 @@ import pl.yahoo.pawelpiedel.Parking.service.driver.DriverService;
 import pl.yahoo.pawelpiedel.Parking.service.place.PlaceService;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.containsString;
@@ -132,7 +133,7 @@ public class ParkingControllerIntegrationTest {
         String location = postResult.getResponse().getHeader("Location");
 
         //when
-        LocalDateTime localDateTime = LocalDateTime.now();
+        LocalDateTime localDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(localDateTime.toString());
         ResultActions resultActions = mockMvc.perform(patch(location)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -215,4 +216,5 @@ public class ParkingControllerIntegrationTest {
                 .andReturn();
 
     }
+
 }

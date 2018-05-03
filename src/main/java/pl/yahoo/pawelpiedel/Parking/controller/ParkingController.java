@@ -101,18 +101,20 @@ public class ParkingController {
     public ResponseEntity<?> stopParkingMeter(@RequestBody @Valid ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO, @PathVariable("id") Long id) {
         LocalDateTime localDateTime = LocalDateTime.parse(parkingStopTimeOnlyDTO.getStopTime());
         Parking updated = new Parking();
+        updated.setId(id);
         try {
-            updated.setId(id);
             updated = parkingService.saveStopTime(localDateTime, id);
-            updated.setParkingStatus(ParkingStatus.COMPLETED);
-            parkingService.save(updated);
-
-            Place parkingPlace = updated.getPlace();
-            placeService.freePlace(parkingPlace);
 
         } catch (ParkingNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
+
+        updated.setParkingStatus(ParkingStatus.COMPLETED);
+        parkingService.save(updated);
+
+        Place parkingPlace = updated.getPlace();
+        placeService.freePlace(parkingPlace);
+
         return ResponseEntity.ok(updated);
     }
 

@@ -240,8 +240,8 @@ public class ParkingControllerTest {
 
         ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(localDateTime.toString());
         Parking updated = new Parking(car, place);
-        parking.setId(testId);
-        parking.setStopTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+        updated.setId(testId);
+        updated.setStopTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         when(parkingService.saveStopTime(any(LocalDateTime.class), eq(testId))).thenReturn(updated);
 
         //when
