@@ -27,6 +27,6 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public boolean isUnknown(Car car) {
-        return car.getDriver() == null;
+        return car.getDriver() == null && car.getId() == null;
     }
 }
