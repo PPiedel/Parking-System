@@ -7,6 +7,7 @@ import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 
@@ -44,7 +45,7 @@ public class Parking {
     public Parking(Car car, Place place) {
         this.car = car;
         this.place = place;
-        startTime = LocalDateTime.now();
+        startTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         parkingStatus = ParkingStatus.ONGOING;
     }
 
@@ -81,7 +82,7 @@ public class Parking {
     }
 
     public LocalDateTime getStartTime() {
-        return startTime;
+        return startTime.truncatedTo(ChronoUnit.SECONDS);
     }
 
     public void setStartTime(LocalDateTime startTime) {
@@ -89,7 +90,7 @@ public class Parking {
     }
 
     public LocalDateTime getStopTime() {
-        return stopTime;
+        return stopTime.truncatedTo(ChronoUnit.SECONDS);
     }
 
     public void setStopTime(LocalDateTime stopTime) {

@@ -34,18 +34,6 @@ public class LocalDateTimeValidatorTest {
 
     }
 
-    @Test
-    public void isValid_ValidDateTimeWithFullPrecisionPassed_TrueReturned() {
-        //given
-        String date = "2018-05-02T18:20:37.999999999";
-
-        //when
-        boolean isValid = localDateTimeValidator.isValid(date, constraintValidatorContext);
-
-        //then
-        assertTrue(isValid);
-
-    }
 
     @Test
     public void isValid_OnlyDatePassed_FalseReturned() {

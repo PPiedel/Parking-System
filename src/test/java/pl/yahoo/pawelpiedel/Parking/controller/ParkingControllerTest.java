@@ -21,10 +21,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
+import pl.yahoo.pawelpiedel.Parking.domain.parking.ParkingStatus;
+import pl.yahoo.pawelpiedel.Parking.domain.payment.Money;
+import pl.yahoo.pawelpiedel.Parking.domain.payment.Payment;
 import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
@@ -36,9 +41,12 @@ import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingNotFoundException;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingService;
 import pl.yahoo.pawelpiedel.Parking.service.place.PlaceService;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -46,8 +54,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -329,6 +336,84 @@ public class ParkingControllerTest {
         //then
         resultActions
                 .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void getPaymentDetails_PaymentAssigned_PaymentDetailsReturned() throws Exception {
+        //given
+        long testId = 1L;
+        Driver driver = new Driver(DriverType.REGULAR);
+        String licensePlateNumber = "testPlate";
+        Car car = new Car(driver, licensePlateNumber);
+        driver.setCars(Collections.singletonList(car));
+
+        Place place = new Place(PlaceStatus.AVAILABLE);
+        long placeId = 2L;
+        place.setId(placeId);
+        Parking parking = new Parking(car, place);
+        parking.setStopTime(LocalDateTime.now());
+        parking.setParkingStatus(ParkingStatus.COMPLETED);
+        Money money = new Money(new BigDecimal(1.5), Currency.getInstance("PLN"));
+        parking.setPayment(new Payment(parking, money));
+        car.addparking(parking);
+
+        when(parkingService.getParking(testId)).thenReturn(Optional.of(parking));
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(API_BASE_URL + "/" + testId + "/payment").contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        resultActions
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.money.amount").value(money.getAmount().toString()))
+                .andExpect(jsonPath("$.money.currency").value(money.getCurrency().toString()))
+                .andExpect(jsonPath("$.parking.place.id").value(place.getId()))
+                .andExpect(jsonPath("$.parking.car.licensePlateNumber").value(licensePlateNumber))
+                .andExpect(jsonPath("$.parking.startTime").value(parking.getStartTime().toString()))
+                .andExpect(jsonPath("$.parking.stopTime").value(parking.getStopTime().toString()))
+                .andExpect(jsonPath("$.parking.parkingStatus").value(parking.getParkingStatus().toString()));
+    }
+
+    @Test
+    public void getPaymentDetails__PaymentNotAssigned_NotFoundReturned() throws Exception {
+        //given
+        long testId = 1L;
+        Driver driver = new Driver(DriverType.REGULAR);
+        String licensePlateNumber = "testPlate";
+        Car car = new Car(driver, licensePlateNumber);
+        driver.setCars(Collections.singletonList(car));
+
+        Place place = new Place(PlaceStatus.TAKEN);
+        long placeId = 2L;
+        place.setId(placeId);
+        Parking parking = new Parking(car, place);
+        parking.setStopTime(LocalDateTime.now());
+        parking.setParkingStatus(ParkingStatus.ONGOING);
+        car.addparking(parking);
+
+        when(parkingService.getParking(testId)).thenReturn(Optional.of(parking));
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(API_BASE_URL + "/" + testId + "/payment").contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        resultActions
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    public void getPaymentDetails__NotExistingParkingIdPassed_ClientErrorReturned() throws Exception {
+        //given
+        Long testId = 1L;
+        when(parkingService.getParking(testId)).thenReturn(Optional.empty());
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(API_BASE_URL + "/" + testId + "/payment").contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        resultActions
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @TestConfiguration

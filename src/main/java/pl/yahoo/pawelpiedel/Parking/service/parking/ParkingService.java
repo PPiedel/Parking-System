@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public interface ParkingService {
@@ -12,5 +13,7 @@ public interface ParkingService {
     Parking save(Parking entity);
 
     Parking save(LocalDateTime stopTime, Long id) throws ParkingNotFoundException;
+
+    Optional<Parking> getParking(Long id);
 
 }

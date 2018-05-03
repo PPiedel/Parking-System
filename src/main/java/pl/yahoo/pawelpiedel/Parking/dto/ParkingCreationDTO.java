@@ -8,10 +8,6 @@ public class ParkingCreationDTO {
     @NotEmpty
     private CarDTO carDTO;
 
-    @NotNull
-    @NotEmpty
-    private String startTime;
-
     public CarDTO getCarDTO() {
         return carDTO;
     }
@@ -20,11 +16,4 @@ public class ParkingCreationDTO {
         this.carDTO = carDTO;
     }
 
-    public String getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
-    }
 }

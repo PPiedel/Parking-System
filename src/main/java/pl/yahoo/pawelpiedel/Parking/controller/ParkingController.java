@@ -18,6 +18,7 @@ import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
 import pl.yahoo.pawelpiedel.Parking.dto.EntityDTOMapper;
 import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopTimeOnlyDTO;
+import pl.yahoo.pawelpiedel.Parking.dto.PaymentDTO;
 import pl.yahoo.pawelpiedel.Parking.service.car.CarService;
 import pl.yahoo.pawelpiedel.Parking.service.driver.DriverService;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingNotFoundException;
@@ -29,6 +30,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping(value = "/api/parking")
@@ -118,5 +120,16 @@ public class ParkingController {
         return ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(parking.getId()).toUri();
+    }
+
+    @GetMapping(value = "/{id}/payment")
+    public ResponseEntity<PaymentDTO> getPaymentDetails(@PathVariable("id") Long id) {
+        Optional<Parking> parkingOptional = parkingService.getParking(id);
+
+        return parkingOptional
+                .map(Parking::getPayment)
+                .map(payment -> new ResponseEntity<>(entityDTOMapper.asDTo(payment), HttpStatus.OK))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+
     }
 }

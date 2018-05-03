@@ -83,7 +83,7 @@ public class ParkingControllerIntegrationTest {
     }
 
     @Test
-    public void startParkMeter_ValidCardDTOPassed_CarAlreadyInDb_CarParkingsUpdated_CreatedWithLocationReturned() throws Exception {
+    public void startParkMeter_ValidCardDTOPassed_CarAlreadyInDb_CreatedWithLocationReturned() throws Exception {
         //given
         //one place available
         Place place = new Place(PlaceStatus.AVAILABLE);
