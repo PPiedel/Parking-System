@@ -34,7 +34,7 @@ import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
 import pl.yahoo.pawelpiedel.Parking.dto.EntityDTOMapper;
-import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopTimeOnlyDTO;
+import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopDTO;
 import pl.yahoo.pawelpiedel.Parking.service.car.CarService;
 import pl.yahoo.pawelpiedel.Parking.service.driver.DriverService;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingNotFoundException;
@@ -64,6 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ParkingControllerTest {
     private static final Logger logger = LoggerFactory.getLogger(ParkingControllerTest.class);
     private static final String API_BASE_URL = "/api/parking";
+    private static final String DEFAULT_CURRENCY = "PLN";
 
     @Autowired
     MockMvc mockMvc;
@@ -238,7 +239,7 @@ public class ParkingControllerTest {
         Parking parking = new Parking(car, place);
         parking.setId(testId);
 
-        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(localDateTime.toString());
+        ParkingStopDTO parkingStopDTO = new ParkingStopDTO(localDateTime.toString(), DEFAULT_CURRENCY);
         Parking updated = new Parking(car, place);
         updated.setId(testId);
         updated.setStopTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
@@ -247,7 +248,7 @@ public class ParkingControllerTest {
         //when
         ResultActions resultActions = mockMvc.perform(patch(API_BASE_URL + "/" + testId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(parkingStopTimeOnlyDTO)));
+                .content(asJsonString(parkingStopDTO)));
 
         //then
         resultActions
@@ -260,14 +261,14 @@ public class ParkingControllerTest {
         //given
         Long notExistingId = 999L;
         LocalDateTime localDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(localDateTime.toString());
+        ParkingStopDTO parkingStopDTO = new ParkingStopDTO(localDateTime.toString(), DEFAULT_CURRENCY);
         when(parkingService.saveStopTime(any(LocalDateTime.class), eq(notExistingId))).thenThrow(ParkingNotFoundException.class);
 
         //when
         ResultActions resultActions = mockMvc.perform(
                 patch(API_BASE_URL + "/" + notExistingId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(parkingStopTimeOnlyDTO)));
+                        .content(asJsonString(parkingStopDTO)));
 
         //then
         resultActions
@@ -295,7 +296,7 @@ public class ParkingControllerTest {
     public void stopParkMeter_NullDateTimePassed_ClientErrorReturned() throws Exception {
         //given
         Long anyId = 1L;
-        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(null);
+        ParkingStopDTO parkingStopDTO = new ParkingStopDTO(null, DEFAULT_CURRENCY);
 
         //when
         ResultActions resultActions = mockMvc.perform(
@@ -312,7 +313,7 @@ public class ParkingControllerTest {
     public void stopParkMeter_EmptyDateTimePassed_ClientErrorReturned() throws Exception {
         //given
         Long anyId = 1L;
-        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO("");
+        ParkingStopDTO parkingStopDTO = new ParkingStopDTO("", DEFAULT_CURRENCY);
 
         //when
         ResultActions resultActions = mockMvc.perform(
@@ -330,7 +331,7 @@ public class ParkingControllerTest {
         //given
         Long anyId = 1L;
         String dateTime = "1994-02-02'T'";
-        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(dateTime);
+        ParkingStopDTO parkingStopDTO = new ParkingStopDTO(dateTime, DEFAULT_CURRENCY);
 
         //when
         ResultActions resultActions = mockMvc.perform(

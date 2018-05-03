@@ -5,17 +5,22 @@ import pl.yahoo.pawelpiedel.Parking.domain.date.LocalDateTimeConstraint;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-public class ParkingStopTimeOnlyDTO {
+public class ParkingStopDTO {
     @NotNull
     @NotEmpty
     @LocalDateTimeConstraint
     private String stopTime;
 
-    public ParkingStopTimeOnlyDTO() {
+    @NotNull
+    @NotEmpty
+    private String currencyType;
+
+    public ParkingStopDTO() {
     }
 
-    public ParkingStopTimeOnlyDTO(@NotNull @NotEmpty String stopTime) {
+    public ParkingStopDTO(@NotNull @NotEmpty String stopTime, @NotNull @NotEmpty String currencyType) {
         this.stopTime = stopTime;
+        this.currencyType = currencyType;
     }
 
     public String getStopTime() {
@@ -24,5 +29,13 @@ public class ParkingStopTimeOnlyDTO {
 
     public void setStopTime(String stopTime) {
         this.stopTime = stopTime;
+    }
+
+    public String getCurrencyType() {
+        return currencyType;
+    }
+
+    public void setCurrencyType(String currencyType) {
+        this.currencyType = currencyType;
     }
 }

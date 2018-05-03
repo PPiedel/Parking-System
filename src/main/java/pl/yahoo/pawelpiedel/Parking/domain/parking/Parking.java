@@ -1,5 +1,6 @@
 package pl.yahoo.pawelpiedel.Parking.domain.parking;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
 import pl.yahoo.pawelpiedel.Parking.domain.payment.Payment;
@@ -27,6 +28,7 @@ public class Parking {
     private Place place;
 
     @OneToOne(mappedBy = "parking", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Payment payment;
 
     @Column(name = "start_time")

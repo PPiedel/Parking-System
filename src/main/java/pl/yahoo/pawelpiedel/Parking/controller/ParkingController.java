@@ -13,11 +13,14 @@ import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.ParkingStatus;
+import pl.yahoo.pawelpiedel.Parking.domain.payment.CurrencyType;
+import pl.yahoo.pawelpiedel.Parking.domain.payment.Payment;
+import pl.yahoo.pawelpiedel.Parking.domain.payment.PaymentFactory;
 import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
 import pl.yahoo.pawelpiedel.Parking.dto.EntityDTOMapper;
-import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopTimeOnlyDTO;
+import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopDTO;
 import pl.yahoo.pawelpiedel.Parking.dto.PaymentDTO;
 import pl.yahoo.pawelpiedel.Parking.service.car.CarService;
 import pl.yahoo.pawelpiedel.Parking.service.driver.DriverService;
@@ -98,18 +101,20 @@ public class ParkingController {
     }
 
     @PatchMapping(value = "/{id}")
-    public ResponseEntity<?> stopParkingMeter(@RequestBody @Valid ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO, @PathVariable("id") Long id) {
-        LocalDateTime localDateTime = LocalDateTime.parse(parkingStopTimeOnlyDTO.getStopTime());
-        Parking updated = new Parking();
-        updated.setId(id);
+    public ResponseEntity<?> stopParkingMeter(@RequestBody @Valid ParkingStopDTO parkingStopDTO, @PathVariable("id") Long id) {
+        LocalDateTime localDateTime = LocalDateTime.parse(parkingStopDTO.getStopTime());
+        CurrencyType currencyType = CurrencyType.valueOf(parkingStopDTO.getCurrencyType());
+        //TODO currency validation
+        Parking updated;
         try {
             updated = parkingService.saveStopTime(localDateTime, id);
-
         } catch (ParkingNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
-
+        updated.setId(id);
         updated.setParkingStatus(ParkingStatus.COMPLETED);
+        Payment payment = PaymentFactory.getPayment(updated, currencyType);
+        updated.setPayment(payment);
         parkingService.save(updated);
 
         Place parkingPlace = updated.getPlace();

@@ -21,7 +21,7 @@ import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
 import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
-import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopTimeOnlyDTO;
+import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopDTO;
 import pl.yahoo.pawelpiedel.Parking.service.driver.DriverService;
 import pl.yahoo.pawelpiedel.Parking.service.place.PlaceService;
 
@@ -43,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ParkingControllerIntegrationTest {
     private static final Logger logger = LoggerFactory.getLogger(ParkingControllerIntegrationTest.class);
     private static final String API_BASE_URL = "/api/parking";
+    private static final String DEFAULT_CURRENCY = "PLN";
 
     @Autowired
     private MockMvc mockMvc;
@@ -134,10 +135,10 @@ public class ParkingControllerIntegrationTest {
 
         //when
         LocalDateTime localDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(localDateTime.toString());
+        ParkingStopDTO parkingStopDTO = new ParkingStopDTO(localDateTime.toString(), DEFAULT_CURRENCY);
         ResultActions resultActions = mockMvc.perform(patch(location)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(parkingStopTimeOnlyDTO)));
+                .content(asJsonString(parkingStopDTO)));
 
         //then
         MvcResult stopResult = resultActions
@@ -171,10 +172,10 @@ public class ParkingControllerIntegrationTest {
 
         //when
         String onlyDate = "2018-12-03";
-        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(onlyDate);
+        ParkingStopDTO parkingStopDTO = new ParkingStopDTO(onlyDate, DEFAULT_CURRENCY);
         ResultActions resultActions = mockMvc.perform(patch(location)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(parkingStopTimeOnlyDTO)));
+                .content(asJsonString(parkingStopDTO)));
 
         //then
         MvcResult stopResult = resultActions
@@ -205,10 +206,10 @@ public class ParkingControllerIntegrationTest {
 
         //when
         String onlyDate = "";
-        ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(onlyDate);
+        ParkingStopDTO parkingStopDTO = new ParkingStopDTO(onlyDate, DEFAULT_CURRENCY);
         ResultActions resultActions = mockMvc.perform(patch(location)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(parkingStopTimeOnlyDTO)));
+                .content(asJsonString(parkingStopDTO)));
 
         //then
         MvcResult stopResult = resultActions
