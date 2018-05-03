@@ -103,7 +103,7 @@ public class ParkingController {
         Parking updated = new Parking();
         try {
             updated.setId(id);
-            updated = parkingService.save(localDateTime, id);
+            updated = parkingService.saveStopTime(localDateTime, id);
             updated.setParkingStatus(ParkingStatus.COMPLETED);
             parkingService.save(updated);
 

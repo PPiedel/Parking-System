@@ -43,6 +43,7 @@ import pl.yahoo.pawelpiedel.Parking.service.place.PlaceService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
@@ -232,12 +233,16 @@ public class ParkingControllerTest {
         Car car = new Car(driver, licensePlateNumber);
         driver.setCars(Collections.singletonList(car));
         Long testId = 1L;
-        LocalDateTime localDateTime = LocalDateTime.now();
-        Parking parking = new Parking(car, new Place(PlaceStatus.TAKEN));
+        LocalDateTime localDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        Place place = new Place(PlaceStatus.TAKEN);
+        Parking parking = new Parking(car, place);
         parking.setId(testId);
 
         ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(localDateTime.toString());
-        when(parkingService.save(any(LocalDateTime.class), eq(testId))).thenReturn(parking);
+        Parking updated = new Parking(car, place);
+        parking.setId(testId);
+        parking.setStopTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+        when(parkingService.saveStopTime(any(LocalDateTime.class), eq(testId))).thenReturn(updated);
 
         //when
         ResultActions resultActions = mockMvc.perform(patch(API_BASE_URL + "/" + testId)
@@ -254,9 +259,9 @@ public class ParkingControllerTest {
     public void stopParkMeter_ParkingNotExist_NotFoundReturned() throws Exception {
         //given
         Long notExistingId = 999L;
-        LocalDateTime localDateTime = LocalDateTime.now();
+        LocalDateTime localDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         ParkingStopTimeOnlyDTO parkingStopTimeOnlyDTO = new ParkingStopTimeOnlyDTO(localDateTime.toString());
-        when(parkingService.save(any(LocalDateTime.class), eq(notExistingId))).thenThrow(ParkingNotFoundException.class);
+        when(parkingService.saveStopTime(any(LocalDateTime.class), eq(notExistingId))).thenThrow(ParkingNotFoundException.class);
 
         //when
         ResultActions resultActions = mockMvc.perform(
