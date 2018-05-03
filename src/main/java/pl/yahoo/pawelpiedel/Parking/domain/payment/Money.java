@@ -7,9 +7,12 @@ import java.util.Objects;
 
 @Embeddable
 public final class Money {
-    public static final Currency DEFAULT_CURRENCY = Currency.getInstance("PLN");
-    private final BigDecimal amount;
-    private final Currency currency;
+    private static final Currency DEFAULT_CURRENCY = Currency.getInstance("PLN");
+    private BigDecimal amount;
+    private Currency currency;
+
+    public Money() { //required by hibernate
+    }
 
     public Money(BigDecimal amount, Currency currency) {
         this.amount = amount;
