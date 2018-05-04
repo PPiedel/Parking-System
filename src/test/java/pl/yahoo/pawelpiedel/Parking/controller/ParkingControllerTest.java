@@ -46,7 +46,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Currency;
-import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.containsString;
@@ -109,7 +108,6 @@ public class ParkingControllerTest {
         String licensePlateNumber = "XYZ123";
         Car car = new Car(driverMock, licensePlateNumber);
         CarDTO carDTO = new CarDTO(licensePlateNumber);
-        List<Parking> openedParkings = Collections.singletonList(parkingMock);
         when(parkingService.isCarAlreadyParked(car.getLicensePlateNumber())).thenReturn(true);
 
         //when
