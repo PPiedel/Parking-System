@@ -14,10 +14,7 @@ import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.ParkingStatus;
 import pl.yahoo.pawelpiedel.Parking.domain.payment.CurrencyType;
-import pl.yahoo.pawelpiedel.Parking.domain.payment.Payment;
-import pl.yahoo.pawelpiedel.Parking.domain.payment.PaymentFactory;
 import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
-import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
 import pl.yahoo.pawelpiedel.Parking.dto.EntityDTOMapper;
 import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopDTO;
@@ -25,6 +22,7 @@ import pl.yahoo.pawelpiedel.Parking.dto.PaymentDTO;
 import pl.yahoo.pawelpiedel.Parking.service.car.CarService;
 import pl.yahoo.pawelpiedel.Parking.service.driver.DriverService;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingService;
+import pl.yahoo.pawelpiedel.Parking.service.payment.PaymentService;
 import pl.yahoo.pawelpiedel.Parking.service.place.PlaceService;
 
 import javax.validation.Valid;
@@ -42,14 +40,16 @@ public class ParkingController {
     private final CarService carService;
     private final PlaceService placeService;
     private final DriverService driverService;
+    private final PaymentService paymentService;
     private final EntityDTOMapper entityDTOMapper;
 
     @Autowired
-    public ParkingController(ParkingService parkingService, CarService carService, PlaceService placeService, DriverService driverService, EntityDTOMapper entityDTOMapper) {
+    public ParkingController(ParkingService parkingService, CarService carService, PlaceService placeService, DriverService driverService, PaymentService paymentService, EntityDTOMapper entityDTOMapper) {
         this.parkingService = parkingService;
         this.carService = carService;
         this.placeService = placeService;
         this.driverService = driverService;
+        this.paymentService = paymentService;
         this.entityDTOMapper = entityDTOMapper;
     }
 
@@ -57,25 +57,18 @@ public class ParkingController {
     public ResponseEntity<?> startParkingMeter(@RequestBody @Valid CarDTO carDTO) {
         List<Place> availablePlaces = placeService.getAvailablePlaces();
 
-        if (availablePlaces.isEmpty()) {
+        if (availablePlaces.isEmpty() || parkingService.isCarAlreadyParked(carDTO.getLicensePlateNumber())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else {
             Car car = entityDTOMapper.asEntity(carDTO);
 
-            if (parkingService.isCarAlreadyParked(car.getLicensePlateNumber())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            }
+            Place place = placeService.findPlaceForParking();
 
-            Place place = findPlaceForParking();
-            place.setPlaceStatus(PlaceStatus.TAKEN);
-
-            Parking parking = new Parking(car, place);
-            parking.setParkingStatus(ParkingStatus.ONGOING);
-            car.addParking(parking);
+            createParking(car, place);
 
             if (carService.isUnknown(car)) {
                 Driver newDriver = new Driver(DriverType.REGULAR);
-                assign(car, newDriver);
+                assignCarToDriver(car, newDriver);
                 Driver saved = driverService.save(newDriver);
                 URI location = buildUri(getLastAddedParking(saved.getCars().get(0)));
                 return ResponseEntity.created(location).build();
@@ -90,19 +83,21 @@ public class ParkingController {
 
     }
 
+    private void createParking(Car car, Place place) {
+        Parking parking = new Parking(car, place);
+        parking.setParkingStatus(ParkingStatus.ONGOING);
+        car.addParking(parking);
+    }
+
     private URI buildUri(Parking parking) {
         return ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(parking.getId()).toUri();
     }
 
-    private void assign(Car car, Driver newDriver) {
+    private void assignCarToDriver(Car car, Driver newDriver) {
         newDriver.setCars(Collections.singletonList(car));
         car.setDriver(newDriver);
-    }
-
-    private Place findPlaceForParking() {
-        return placeService.getNextFirstFreePlace();
     }
 
     private Parking getLastAddedParking(Car car) {
@@ -115,21 +110,17 @@ public class ParkingController {
         CurrencyType currencyType = CurrencyType.valueOf(parkingStopDTO.getCurrencyType());
         //TODO currency validation
 
-        Optional<Parking> optional = parkingService.findParkingById(id);
-        if (optional.isPresent()) {
-            Parking parking = optional.get();
-            parking.setStopTime(stopTime);
-            parking.setParkingStatus(ParkingStatus.COMPLETED);
+        Optional<Parking> parkingOptional = parkingService.findParkingById(id);
+        if (parkingOptional.isPresent()) {
+            Parking parking = parkingOptional.get();
 
-            Payment payment = PaymentFactory.getPayment(parking, currencyType);
-            parking.setPayment(payment);
+            parkingService.stopParking(parking, stopTime);
 
-            parkingService.save(parking);
+            paymentService.assignPaymentToParking(parking, currencyType);
 
-            Place parkingPlace = parking.getPlace();
-            placeService.freePlace(parkingPlace);
+            placeService.releasePlace(parking.getPlace());
 
-            return ResponseEntity.ok(optional);
+            return ResponseEntity.ok(parking);
         } else {
             return ResponseEntity.notFound().build();
         }

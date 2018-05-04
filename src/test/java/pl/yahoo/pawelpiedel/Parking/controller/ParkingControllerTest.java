@@ -135,7 +135,7 @@ public class ParkingControllerTest {
         CarDTO carDTO = new CarDTO(licensePlateNumber);
         when(parkingService.isCarAlreadyParked(car.getLicensePlateNumber())).thenReturn(false);
         when(placeService.getAvailablePlaces()).thenReturn(Collections.singletonList(placeMock));
-        when(placeService.getNextFirstFreePlace()).thenReturn(placeMock);
+        when(placeService.findPlaceForParking()).thenReturn(placeMock);
         when(driverService.save(any())).thenReturn(driver);
         Parking parking = new Parking(car, placeMock);
         Long parkingId = 1L;
@@ -423,7 +423,7 @@ public class ParkingControllerTest {
     }
 
     @TestConfiguration
-    static class MoviesControllerTestConfiguration {
+    static class ParkingControllerTestConfiguration {
         @Bean
         ModelMapper modelMapper() {
             return new ModelMapper();

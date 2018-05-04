@@ -45,4 +45,11 @@ public class ParkingServiceImpl implements ParkingService {
     public Optional<Parking> findParkingById(Long id) {
         return parkingRepository.findById(id);
     }
+
+    @Override
+    public Parking stopParking(Parking parking, LocalDateTime stopTime) {
+        parking.setStopTime(stopTime);
+        parking.setParkingStatus(ParkingStatus.COMPLETED);
+        return save(parking);
+    }
 }

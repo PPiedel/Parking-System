@@ -25,7 +25,13 @@ public final class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
-    public Place getNextFirstFreePlace() {
+    public Place findPlaceForParking() {
+        Place place = getFirstFreePlace();
+        place.setPlaceStatus(PlaceStatus.TAKEN);
+        return place;
+    }
+
+    private Place getFirstFreePlace() {
         List<Place> freePlaces = getAvailablePlaces();
         return freePlaces.get(0);
     }
@@ -36,7 +42,7 @@ public final class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
-    public Place freePlace(Place place) {
+    public Place releasePlace(Place place) {
         place.setPlaceStatus(PlaceStatus.AVAILABLE);
         return save(place);
     }

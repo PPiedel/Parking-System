@@ -16,4 +16,6 @@ public interface ParkingService {
 
     Optional<Parking> findParkingById(Long id);
 
+    Parking stopParking(Parking parking, LocalDateTime stopTime);
+
 }

@@ -9,9 +9,9 @@ import java.util.List;
 public interface PlaceService {
     List<Place> getAvailablePlaces();
 
-    Place getNextFirstFreePlace();
+    Place findPlaceForParking();
 
     Place save(Place place);
 
-    Place freePlace(Place place);
+    Place releasePlace(Place place);
 }
