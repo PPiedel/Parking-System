@@ -18,13 +18,13 @@ public class PlnPaymentStrategy implements pl.yahoo.pawelpiedel.Parking.domain.p
         switch (driverType) {
             case REGULAR:
                 strategy = new PlnRegularDriverStrategy();
-                return new Money(strategy.calculateMoney(parking.getStartTime(), parking.getStopTime()));
+                return new Money(strategy.calculateFee(parking.getStartTime(), parking.getStopTime()));
             case VIP:
                 strategy = new PLNVipDriverStrategy();
-                return new Money(strategy.calculateMoney(parking.getStartTime(), parking.getStopTime()));
+                return new Money(strategy.calculateFee(parking.getStartTime(), parking.getStopTime()));
             default:
                 strategy = new PLNVipDriverStrategy();
-                return new Money(strategy.calculateMoney(parking.getStartTime(), parking.getStopTime()));
+                return new Money(strategy.calculateFee(parking.getStartTime(), parking.getStopTime()));
         }
 
     }

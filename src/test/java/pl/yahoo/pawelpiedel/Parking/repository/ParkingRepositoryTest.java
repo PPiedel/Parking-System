@@ -42,7 +42,7 @@ public class ParkingRepositoryTest {
         Parking parking = new Parking(car, place);
         place.setPlaceStatus(PlaceStatus.TAKEN);
         parking.setParkingStatus(ParkingStatus.ONGOING);
-        car.addparking(parking);
+        car.addParking(parking);
         driver.setCars(Collections.singletonList(car));
         testEntityManager.persist(driver);
         testEntityManager.flush();

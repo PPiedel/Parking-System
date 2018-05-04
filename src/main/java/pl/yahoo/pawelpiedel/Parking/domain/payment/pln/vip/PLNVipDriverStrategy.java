@@ -13,7 +13,7 @@ public class PLNVipDriverStrategy extends PlnPaymentStrategy implements PlnDrive
     public final static double EACH_NEXT_HOUR_RATE = 1.2;
 
     @Override
-    public BigDecimal calculateMoney(LocalDateTime startTime, LocalDateTime stopTime) {
+    public BigDecimal calculateFee(LocalDateTime startTime, LocalDateTime stopTime) {
         long minutesBetween = ChronoUnit.MINUTES.between(startTime, stopTime);
         return new BigDecimal(getAmount(minutesBetween));
     }

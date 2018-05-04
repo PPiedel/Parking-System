@@ -8,7 +8,7 @@ public abstract class PaymentFactory {
     public static Payment getPayment(Parking parking, CurrencyType currencyType) {
         Payment payment;
 
-        pl.yahoo.pawelpiedel.Parking.domain.payment.PaymentStrategy paymentStrategy;
+        PaymentStrategy paymentStrategy;
         switch (currencyType) {
             case PLN: {
                 paymentStrategy = new PlnPaymentStrategy();

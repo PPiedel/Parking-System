@@ -243,7 +243,7 @@ public class ParkingControllerTest {
         Parking updated = new Parking(car, place);
         updated.setId(testId);
         updated.setStopTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
-        when(parkingService.saveStopTime(any(LocalDateTime.class), eq(testId))).thenReturn(updated);
+        when(parkingService.findParkingById(testId)).thenReturn(Optional.of(updated));
 
         //when
         ResultActions resultActions = mockMvc.perform(patch(API_BASE_URL + "/" + testId)
@@ -361,9 +361,9 @@ public class ParkingControllerTest {
         parking.setParkingStatus(ParkingStatus.COMPLETED);
         Money money = new Money(new BigDecimal(1.5), Currency.getInstance("PLN"));
         parking.setPayment(new Payment(parking, money));
-        car.addparking(parking);
+        car.addParking(parking);
 
-        when(parkingService.getParking(testId)).thenReturn(Optional.of(parking));
+        when(parkingService.findParkingById(testId)).thenReturn(Optional.of(parking));
 
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(API_BASE_URL + "/" + testId + "/payment").contentType(MediaType.APPLICATION_JSON));
@@ -396,9 +396,9 @@ public class ParkingControllerTest {
         Parking parking = new Parking(car, place);
         parking.setStopTime(LocalDateTime.now());
         parking.setParkingStatus(ParkingStatus.ONGOING);
-        car.addparking(parking);
+        car.addParking(parking);
 
-        when(parkingService.getParking(testId)).thenReturn(Optional.of(parking));
+        when(parkingService.findParkingById(testId)).thenReturn(Optional.of(parking));
 
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(API_BASE_URL + "/" + testId + "/payment").contentType(MediaType.APPLICATION_JSON));
@@ -412,7 +412,7 @@ public class ParkingControllerTest {
     public void getPaymentDetails__NotExistingParkingIdPassed_ClientErrorReturned() throws Exception {
         //given
         Long testId = 1L;
-        when(parkingService.getParking(testId)).thenReturn(Optional.empty());
+        when(parkingService.findParkingById(testId)).thenReturn(Optional.empty());
 
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(API_BASE_URL + "/" + testId + "/payment").contentType(MediaType.APPLICATION_JSON));

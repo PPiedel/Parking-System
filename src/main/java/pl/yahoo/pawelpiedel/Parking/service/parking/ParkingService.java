@@ -14,6 +14,6 @@ public interface ParkingService {
 
     Parking saveStopTime(LocalDateTime stopTime, Long id) throws ParkingNotFoundException;
 
-    Optional<Parking> getParking(Long id);
+    Optional<Parking> findParkingById(Long id);
 
 }

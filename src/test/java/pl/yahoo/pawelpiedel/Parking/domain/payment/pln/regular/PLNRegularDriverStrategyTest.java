@@ -1,16 +1,104 @@
 package pl.yahoo.pawelpiedel.Parking.domain.payment.pln.regular;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.Assert.assertEquals;
 import static pl.yahoo.pawelpiedel.Parking.domain.payment.pln.regular.PlnRegularDriverStrategy.FIRST_HOUR_RATE;
 import static pl.yahoo.pawelpiedel.Parking.domain.payment.pln.regular.PlnRegularDriverStrategy.SECOND_HOUR_RATE;
 
+@RunWith(SpringRunner.class)
 public class PLNRegularDriverStrategyTest {
 
+    @Autowired
+    private PlnRegularDriverStrategy strategy;
+
     @Test
-    public void getFee() {
+    public void calculateFee_ZeroMinutesParking_ZeroReturned() {
+        //given
+        LocalDateTime startTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime stopTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+
+        //when
+        BigDecimal fee = strategy.calculateFee(startTime, stopTime);
+
+        //then
+        assertEquals(new BigDecimal(0), fee);
     }
+
+    @Test
+    public void calculateFee_30MinutesParking_FeeReturned() {
+        //given
+        LocalDateTime startTime = LocalDateTime.of(2015, 10, 10, 12, 0, 1);
+        LocalDateTime stopTime = LocalDateTime.of(2015, 10, 10, 12, 30, 1);
+
+        //when
+        BigDecimal fee = strategy.calculateFee(startTime, stopTime);
+
+        //then
+        assertEquals(new BigDecimal(0.5), fee);
+    }
+
+    @Test
+    public void calculateFee_60MinutesParking_FeeReturned() {
+        //given
+        LocalDateTime startTime = LocalDateTime.of(2015, 10, 10, 12, 5, 0);
+        LocalDateTime stopTime = LocalDateTime.of(2015, 10, 10, 13, 5, 0);
+
+        //when
+        BigDecimal fee = strategy.calculateFee(startTime, stopTime);
+
+        //then
+        assertEquals(new BigDecimal(FIRST_HOUR_RATE), fee);
+    }
+
+    @Test
+    public void calculateFee_90MinutesParking_FeeReturned() {
+        //given
+        LocalDateTime startTime = LocalDateTime.of(2015, 10, 10, 12, 0, 0);
+        LocalDateTime stopTime = LocalDateTime.of(2015, 10, 10, 13, 30, 0);
+
+        //when
+        BigDecimal fee = strategy.calculateFee(startTime, stopTime);
+
+        //then
+        assertEquals(new BigDecimal(2), fee);
+    }
+
+    @Test
+    public void calculateFee_120MinutesParking_FeeReturned() {
+        //given
+        LocalDateTime startTime = LocalDateTime.of(2015, 10, 10, 12, 0, 0);
+        LocalDateTime stopTime = LocalDateTime.of(2015, 10, 10, 14, 0, 0);
+
+        //when
+        BigDecimal fee = strategy.calculateFee(startTime, stopTime);
+
+        //then
+        assertEquals(new BigDecimal(FIRST_HOUR_RATE + SECOND_HOUR_RATE), fee);
+    }
+
+    @Test
+    public void calculateFee_150MinutesParking_FeeReturned() {
+        //given
+        LocalDateTime startTime = LocalDateTime.of(2015, 10, 10, 12, 0, 0);
+        LocalDateTime stopTime = LocalDateTime.of(2015, 10, 10, 14, 30, 0);
+
+        //when
+        BigDecimal fee = strategy.calculateFee(startTime, stopTime);
+
+        //then
+        assertEquals(new BigDecimal(4.5), fee);
+    }
+
 
     @Test
     public void getAmount_ZeroMinutes_ZeroReturned() {
@@ -18,7 +106,6 @@ public class PLNRegularDriverStrategyTest {
         long minutes = 0;
 
         //when
-        PlnRegularDriverStrategy strategy = new PlnRegularDriverStrategy();
         double amount = strategy.getAmount(minutes);
 
         //then
@@ -31,7 +118,6 @@ public class PLNRegularDriverStrategyTest {
         long minutes = 30;
 
         //when
-        PlnRegularDriverStrategy strategy = new PlnRegularDriverStrategy();
         double amount = strategy.getAmount(minutes);
 
         //then
@@ -44,7 +130,6 @@ public class PLNRegularDriverStrategyTest {
         long minutes = 60;
 
         //when
-        PlnRegularDriverStrategy strategy = new PlnRegularDriverStrategy();
         double amount = strategy.getAmount(minutes);
 
         //then
@@ -57,13 +142,11 @@ public class PLNRegularDriverStrategyTest {
         long minutes = 90;
 
         //when
-        PlnRegularDriverStrategy strategy = new PlnRegularDriverStrategy();
         double amount = strategy.getAmount(minutes);
 
         //then
         assertEquals(2, amount, 0.0);
     }
-
 
     @Test
     public void getAmount_120Minutes_First_CorrectAmountReturned() {
@@ -71,7 +154,6 @@ public class PLNRegularDriverStrategyTest {
         long minutes = 120;
 
         //when
-        PlnRegularDriverStrategy strategy = new PlnRegularDriverStrategy();
         double amount = strategy.getAmount(minutes);
 
         //then
@@ -84,11 +166,19 @@ public class PLNRegularDriverStrategyTest {
         long minutes = 150;
 
         //when
-        PlnRegularDriverStrategy strategy = new PlnRegularDriverStrategy();
         double amount = strategy.getAmount(minutes);
 
         //then
         assertEquals(4.5, amount, 0.0);
+    }
+
+    @TestConfiguration
+    static class PLNRegularDirverStategyTestCOnfiguraiotn {
+        @Bean
+        public PlnRegularDriverStrategy plnRegularDriverStrategy() {
+            return new PlnRegularDriverStrategy();
+        }
+
     }
 
 

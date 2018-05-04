@@ -4,5 +4,5 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public interface PlnDriverFeeStrategy {
-    public BigDecimal calculateMoney(LocalDateTime startTime, LocalDateTime stopTime);
+    public BigDecimal calculateFee(LocalDateTime startTime, LocalDateTime stopTime);
 }

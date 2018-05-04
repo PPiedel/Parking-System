@@ -18,6 +18,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
+import pl.yahoo.pawelpiedel.Parking.domain.parking.ParkingStatus;
+import pl.yahoo.pawelpiedel.Parking.domain.payment.CurrencyType;
 import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.domain.place.PlaceStatus;
 import pl.yahoo.pawelpiedel.Parking.dto.CarDTO;
@@ -30,11 +32,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "src/test/resources/application.properties")
@@ -178,9 +179,9 @@ public class ParkingControllerIntegrationTest {
                 .content(asJsonString(parkingStopDTO)));
 
         //then
-        MvcResult stopResult = resultActions
-                .andExpect(status().is4xxClientError())
-                .andReturn();
+
+        resultActions
+                .andExpect(status().is4xxClientError());
 
     }
 
@@ -216,6 +217,83 @@ public class ParkingControllerIntegrationTest {
                 .andExpect(status().is4xxClientError())
                 .andReturn();
 
+    }
+
+    @Test
+    public void getPaymentDetails_ParkingExist_ZeroMinutesParking_DetailsReturned() throws Exception {
+        //given
+        Place place = new Place(PlaceStatus.AVAILABLE);
+        Place savedPlace = placeService.save(place);
+        String licensePlateNumber = "ABC123";
+        CarDTO carDTO = new CarDTO(licensePlateNumber);
+
+        //parking started
+        MvcResult postResult = mockMvc.perform(post(API_BASE_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(carDTO)))
+                .andReturn();
+        String location = postResult.getResponse().getHeader("Location");
+
+        //parking stopped
+        LocalDateTime stopTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        ParkingStopDTO parkingStopDTO = new ParkingStopDTO(stopTime.toString(), DEFAULT_CURRENCY);
+        mockMvc.perform(patch(location)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(parkingStopDTO)));
+
+        //when
+        ResultActions paymentDetailsResult = mockMvc.perform(get(location + "/payment")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        paymentDetailsResult
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.money.amount").value(0))
+                .andExpect(jsonPath("$.money.currency").value(CurrencyType.PLN.toString()))
+                .andExpect(jsonPath("$.parking.car.licensePlateNumber", is(licensePlateNumber)))
+                .andExpect(jsonPath("$.parking.place.id", is(savedPlace.getId().intValue())))
+                .andExpect(jsonPath("$.parking.place.placeStatus", is(PlaceStatus.AVAILABLE.toString())))
+                .andExpect(jsonPath("$.parking.parkingStatus", is(ParkingStatus.COMPLETED.toString())))
+                .andExpect(jsonPath("$.parking.stopTime").value(stopTime.toString()));
+
+    }
+
+    @Test
+    public void getPaymentDetails_ParkingOngoing_PaymentNotAssignedYet_NotFoundReturned() throws Exception {
+        //given
+        Place place = new Place(PlaceStatus.AVAILABLE);
+        Place savedPlace = placeService.save(place);
+        String licensePlateNumber = "ABC123";
+        CarDTO carDTO = new CarDTO(licensePlateNumber);
+
+        //parking started
+        MvcResult postResult = mockMvc.perform(post(API_BASE_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(carDTO)))
+                .andReturn();
+        String location = postResult.getResponse().getHeader("Location");
+
+        //when
+        ResultActions paymentDetailsResult = mockMvc.perform(get(location + "/payment")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        paymentDetailsResult
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getPaymentDetails_ParkingNotExist_NotFoundReturned() throws Exception {
+        //given
+        //no parking
+
+        //when
+        ResultActions paymentDetailsResult = mockMvc.perform(get("http://localhost/api/parking/999" + "/payment")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        paymentDetailsResult
+                .andExpect(status().isNotFound());
     }
 
 }

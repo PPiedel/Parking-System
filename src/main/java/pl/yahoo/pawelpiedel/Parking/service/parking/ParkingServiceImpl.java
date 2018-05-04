@@ -42,7 +42,7 @@ public class ParkingServiceImpl implements ParkingService {
     }
 
     @Override
-    public Optional<Parking> getParking(Long id) {
+    public Optional<Parking> findParkingById(Long id) {
         return parkingRepository.findById(id);
     }
 }

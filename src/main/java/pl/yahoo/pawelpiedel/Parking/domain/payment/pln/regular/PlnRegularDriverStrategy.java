@@ -7,13 +7,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+
 public class PlnRegularDriverStrategy extends PlnPaymentStrategy implements PlnDriverFeeStrategy {
-    public final static double FIRST_HOUR_RATE = 1;
-    public final static double SECOND_HOUR_RATE = 2;
-    public final static double EACH_NEXT_HOUR_RATE = 1.5;
+    final static double FIRST_HOUR_RATE = 1;
+    final static double SECOND_HOUR_RATE = 2;
+    private final static double EACH_NEXT_HOUR_RATE = 1.5;
 
     @Override
-    public BigDecimal calculateMoney(LocalDateTime startTime, LocalDateTime stopTime) {
+    public BigDecimal calculateFee(LocalDateTime startTime, LocalDateTime stopTime) {
         long minutesBetween = ChronoUnit.MINUTES.between(startTime, stopTime);
         return new BigDecimal(getAmount(minutesBetween));
     }

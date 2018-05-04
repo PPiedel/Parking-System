@@ -24,7 +24,6 @@ import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopDTO;
 import pl.yahoo.pawelpiedel.Parking.dto.PaymentDTO;
 import pl.yahoo.pawelpiedel.Parking.service.car.CarService;
 import pl.yahoo.pawelpiedel.Parking.service.driver.DriverService;
-import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingNotFoundException;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingService;
 import pl.yahoo.pawelpiedel.Parking.service.place.PlaceService;
 
@@ -72,12 +71,11 @@ public class ParkingController {
 
             Parking parking = new Parking(car, place);
             parking.setParkingStatus(ParkingStatus.ONGOING);
-            car.addparking(parking);
+            car.addParking(parking);
 
             if (carService.isUnknown(car)) {
                 Driver newDriver = new Driver(DriverType.REGULAR);
-                newDriver.setCars(Collections.singletonList(car));
-                car.setDriver(newDriver);
+                assign(car, newDriver);
                 Driver saved = driverService.save(newDriver);
                 URI location = buildUri(getLastAddedParking(saved.getCars().get(0)));
                 return ResponseEntity.created(location).build();
@@ -92,6 +90,17 @@ public class ParkingController {
 
     }
 
+    private URI buildUri(Parking parking) {
+        return ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{id}")
+                .buildAndExpand(parking.getId()).toUri();
+    }
+
+    private void assign(Car car, Driver newDriver) {
+        newDriver.setCars(Collections.singletonList(car));
+        car.setDriver(newDriver);
+    }
+
     private Place findPlaceForParking() {
         return placeService.getNextFirstFreePlace();
     }
@@ -102,36 +111,35 @@ public class ParkingController {
 
     @PatchMapping(value = "/{id}")
     public ResponseEntity<?> stopParkingMeter(@RequestBody @Valid ParkingStopDTO parkingStopDTO, @PathVariable("id") Long id) {
-        LocalDateTime localDateTime = LocalDateTime.parse(parkingStopDTO.getStopTime());
+        LocalDateTime stopTime = LocalDateTime.parse(parkingStopDTO.getStopTime());
         CurrencyType currencyType = CurrencyType.valueOf(parkingStopDTO.getCurrencyType());
         //TODO currency validation
-        Parking updated;
-        try {
-            updated = parkingService.saveStopTime(localDateTime, id);
-        } catch (ParkingNotFoundException e) {
+
+        Optional<Parking> optional = parkingService.findParkingById(id);
+        if (optional.isPresent()) {
+            Parking parking = optional.get();
+            parking.setStopTime(stopTime);
+            parking.setParkingStatus(ParkingStatus.COMPLETED);
+
+            Payment payment = PaymentFactory.getPayment(parking, currencyType);
+            parking.setPayment(payment);
+
+            parkingService.save(parking);
+
+            Place parkingPlace = parking.getPlace();
+            placeService.freePlace(parkingPlace);
+
+            return ResponseEntity.ok(optional);
+        } else {
             return ResponseEntity.notFound().build();
         }
-        updated.setId(id);
-        updated.setParkingStatus(ParkingStatus.COMPLETED);
-        Payment payment = PaymentFactory.getPayment(updated, currencyType);
-        updated.setPayment(payment);
-        parkingService.save(updated);
 
-        Place parkingPlace = updated.getPlace();
-        placeService.freePlace(parkingPlace);
 
-        return ResponseEntity.ok(updated);
-    }
-
-    private URI buildUri(Parking parking) {
-        return ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{id}")
-                .buildAndExpand(parking.getId()).toUri();
     }
 
     @GetMapping(value = "/{id}/payment")
     public ResponseEntity<PaymentDTO> getPaymentDetails(@PathVariable("id") Long id) {
-        Optional<Parking> parkingOptional = parkingService.getParking(id);
+        Optional<Parking> parkingOptional = parkingService.findParkingById(id);
 
         return parkingOptional
                 .map(Parking::getPayment)

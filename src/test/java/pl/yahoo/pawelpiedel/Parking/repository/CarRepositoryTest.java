@@ -76,7 +76,7 @@ public class CarRepositoryTest {
         //add parking to car
         Parking parking = new Parking(car, place);
         place.setPlaceStatus(PlaceStatus.TAKEN);
-        car.addparking(parking);
+        car.addParking(parking);
         Car updated = carRepository.save(car);
 
         assertEquals(1, carRepository.findAll().size());

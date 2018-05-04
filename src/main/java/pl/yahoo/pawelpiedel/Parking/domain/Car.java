@@ -40,7 +40,7 @@ public class Car {
         this.licensePlateNumber = licensePlateNumber;
     }
 
-    public void addparking(Parking parking) {
+    public void addParking(Parking parking) {
         if (parkings == null) {
             parkings = new ArrayList<>();
         }

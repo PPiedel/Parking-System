@@ -86,7 +86,7 @@ public class EntityDTOMapperTest {
         parking.setParkingStatus(ParkingStatus.COMPLETED);
         Payment payment = new Payment(parking, new Money(new BigDecimal(1.5), Currency.getInstance("PLN")));
         parking.setPayment(payment);
-        car.addparking(parking);
+        car.addParking(parking);
 
         //when
         PaymentDTO paymentDTO = entityDTOMapper.asDTo(parking.getPayment());
