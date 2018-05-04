@@ -37,7 +37,6 @@ import pl.yahoo.pawelpiedel.Parking.dto.EntityDTOMapper;
 import pl.yahoo.pawelpiedel.Parking.dto.ParkingStopDTO;
 import pl.yahoo.pawelpiedel.Parking.service.car.CarService;
 import pl.yahoo.pawelpiedel.Parking.service.driver.DriverService;
-import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingNotFoundException;
 import pl.yahoo.pawelpiedel.Parking.service.parking.ParkingService;
 import pl.yahoo.pawelpiedel.Parking.service.place.PlaceService;
 
@@ -49,7 +48,7 @@ import java.util.Currency;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -133,7 +132,7 @@ public class ParkingControllerTest {
         CarDTO carDTO = new CarDTO(licensePlateNumber);
         when(parkingService.isCarAlreadyParked(car.getLicensePlateNumber())).thenReturn(false);
         when(placeService.getAvailablePlaces()).thenReturn(Collections.singletonList(placeMock));
-        when(placeService.findPlaceForParking()).thenReturn(placeMock);
+        when(placeService.getPlaceForParking(anyList())).thenReturn(placeMock);
         when(driverService.save(any())).thenReturn(driver);
         Parking parking = new Parking(car, placeMock);
         Long parkingId = 1L;
@@ -260,7 +259,7 @@ public class ParkingControllerTest {
         Long notExistingId = 999L;
         LocalDateTime localDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         ParkingStopDTO parkingStopDTO = new ParkingStopDTO(localDateTime.toString(), DEFAULT_CURRENCY);
-        when(parkingService.saveStopTime(any(LocalDateTime.class), eq(notExistingId))).thenThrow(ParkingNotFoundException.class);
+        when(parkingService.findParkingById(notExistingId)).thenReturn(Optional.empty());
 
         //when
         ResultActions resultActions = mockMvc.perform(
@@ -374,7 +373,7 @@ public class ParkingControllerTest {
                 .andExpect(jsonPath("$.money.currency").value(money.getCurrency().toString()))
                 .andExpect(jsonPath("$.parking.place.id").value(place.getId()))
                 .andExpect(jsonPath("$.parking.car.licensePlateNumber").value(licensePlateNumber))
-                .andExpect(jsonPath("$.parking.startTime").value(parking.getStartTime().toString()))
+                .andExpect(jsonPath("$.parking.startTime").value(parking.getStartTime().truncatedTo(ChronoUnit.SECONDS).toString()))
                 .andExpect(jsonPath("$.parking.stopTime").value(parking.getStopTime().toString()))
                 .andExpect(jsonPath("$.parking.parkingStatus").value(parking.getParkingStatus().toString()));
     }

@@ -1,7 +1,10 @@
 package pl.yahoo.pawelpiedel.Parking.service.driver;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,6 +17,7 @@ import pl.yahoo.pawelpiedel.Parking.repository.DriverRepository;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 
@@ -24,6 +28,14 @@ public class DriverServiceImplTest {
 
     @MockBean
     private DriverRepository driverRepository;
+
+    @Mock
+    private Driver driverMock;
+
+    @Before
+    public void before() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     public void findDriver_DriverExists_OptionalWithValueReturned() {
@@ -51,6 +63,18 @@ public class DriverServiceImplTest {
 
         //then
         assertFalse(foundDriver.isPresent());
+    }
+
+    @Test
+    public void save_DriverSaved_DriverReturned() {
+        //given
+        when(driverRepository.save(any())).thenReturn(driverMock);
+
+        //when
+        Driver saved = driverService.save(new Driver(DriverType.REGULAR));
+
+        //then
+        assertEquals(driverMock, saved);
     }
 
     @TestConfiguration

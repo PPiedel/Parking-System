@@ -25,15 +25,13 @@ public final class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
-    public Place findPlaceForParking() {
-        Place place = getFirstFreePlace();
-        place.setPlaceStatus(PlaceStatus.TAKEN);
+    public Place getPlaceForParking(List<Place> places) {
+        Place place = null;
+        if (places != null && !places.isEmpty()) {
+            place = places.get(0);
+            place.setPlaceStatus(PlaceStatus.TAKEN);
+        }
         return place;
-    }
-
-    private Place getFirstFreePlace() {
-        List<Place> freePlaces = getAvailablePlaces();
-        return freePlaces.get(0);
     }
 
     @Override
@@ -44,6 +42,6 @@ public final class PlaceServiceImpl implements PlaceService {
     @Override
     public Place releasePlace(Place place) {
         place.setPlaceStatus(PlaceStatus.AVAILABLE);
-        return save(place);
+        return place;
     }
 }

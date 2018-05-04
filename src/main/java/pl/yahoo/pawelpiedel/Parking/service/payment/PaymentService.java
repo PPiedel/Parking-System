@@ -6,5 +6,5 @@ import pl.yahoo.pawelpiedel.Parking.domain.payment.CurrencyType;
 
 @Service
 public interface PaymentService {
-    Parking assignPaymentToParking(Parking parking, CurrencyType currencyType);
+    Parking assignPaymentInGivenCurrency(Parking parking, CurrencyType currencyType);
 }

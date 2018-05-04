@@ -12,10 +12,8 @@ public interface ParkingService {
 
     Parking save(Parking entity);
 
-    Parking saveStopTime(LocalDateTime stopTime, Long id) throws ParkingNotFoundException;
-
     Optional<Parking> findParkingById(Long id);
 
-    Parking stopParking(Parking parking, LocalDateTime stopTime);
+    Parking stopParkingAtTime(Parking parking, LocalDateTime stopTime);
 
 }

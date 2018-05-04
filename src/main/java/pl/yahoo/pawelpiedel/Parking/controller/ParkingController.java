@@ -62,7 +62,7 @@ public class ParkingController {
         } else {
             Car car = entityDTOMapper.asEntity(carDTO);
 
-            Place place = placeService.findPlaceForParking();
+            Place place = placeService.getPlaceForParking(availablePlaces);
 
             createParking(car, place);
 
@@ -114,11 +114,13 @@ public class ParkingController {
         if (parkingOptional.isPresent()) {
             Parking parking = parkingOptional.get();
 
-            parkingService.stopParking(parking, stopTime);
+            parkingService.stopParkingAtTime(parking, stopTime);
+            parkingService.save(parking);
 
-            paymentService.assignPaymentToParking(parking, currencyType);
+            paymentService.assignPaymentInGivenCurrency(parking, currencyType);
 
-            placeService.releasePlace(parking.getPlace());
+            Place released = placeService.releasePlace(parking.getPlace());
+            placeService.save(released);
 
             return ResponseEntity.ok(parking);
         } else {

@@ -133,7 +133,6 @@ public class Parking {
                 "id=" + id +
                 ", car=" + car +
                 ", place=" + place +
-                ", payment=" + payment +
                 ", startTime=" + startTime +
                 ", stopTime=" + stopTime +
                 ", parkingStatus=" + parkingStatus +

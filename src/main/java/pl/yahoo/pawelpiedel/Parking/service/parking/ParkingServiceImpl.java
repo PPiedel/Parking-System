@@ -29,27 +29,14 @@ public class ParkingServiceImpl implements ParkingService {
     }
 
     @Override
-    public Parking saveStopTime(LocalDateTime stopTime, Long id) throws ParkingNotFoundException {
-        Optional<Parking> parkingOptional = parkingRepository.findById(id);
-        if (parkingOptional.isPresent()) {
-            Parking entity = parkingOptional.get();
-            entity.setStopTime(stopTime);
-            return entity;
-        } else {
-            throw new ParkingNotFoundException("Parking with id " + id + " not found.");
-        }
-
-    }
-
-    @Override
     public Optional<Parking> findParkingById(Long id) {
         return parkingRepository.findById(id);
     }
 
     @Override
-    public Parking stopParking(Parking parking, LocalDateTime stopTime) {
+    public Parking stopParkingAtTime(Parking parking, LocalDateTime stopTime) {
         parking.setStopTime(stopTime);
         parking.setParkingStatus(ParkingStatus.COMPLETED);
-        return save(parking);
+        return parking;
     }
 }

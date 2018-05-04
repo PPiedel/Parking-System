@@ -44,4 +44,12 @@ public final class Money {
     public int hashCode() {
         return Objects.hash(amount, currency);
     }
+
+    @Override
+    public String toString() {
+        return "Money{" +
+                "amount=" + amount +
+                ", currency=" + currency +
+                '}';
+    }
 }

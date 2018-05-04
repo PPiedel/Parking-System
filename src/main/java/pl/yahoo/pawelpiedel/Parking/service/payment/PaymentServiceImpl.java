@@ -10,7 +10,7 @@ import pl.yahoo.pawelpiedel.Parking.domain.payment.PaymentFactory;
 public class PaymentServiceImpl implements PaymentService {
 
     @Override
-    public Parking assignPaymentToParking(Parking parking, CurrencyType currencyType) {
+    public Parking assignPaymentInGivenCurrency(Parking parking, CurrencyType currencyType) {
         Payment payment = PaymentFactory.getPayment(parking, currencyType);
         parking.setPayment(payment);
         return parking;

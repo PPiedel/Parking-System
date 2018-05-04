@@ -9,7 +9,7 @@ import java.util.List;
 public interface PlaceService {
     List<Place> getAvailablePlaces();
 
-    Place findPlaceForParking();
+    Place getPlaceForParking(List<Place> places);
 
     Place save(Place place);
 

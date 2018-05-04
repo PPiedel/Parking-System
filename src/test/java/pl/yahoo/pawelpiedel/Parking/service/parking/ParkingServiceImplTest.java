@@ -13,12 +13,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 import pl.yahoo.pawelpiedel.Parking.domain.parking.ParkingStatus;
+import pl.yahoo.pawelpiedel.Parking.domain.place.Place;
 import pl.yahoo.pawelpiedel.Parking.repository.ParkingRepository;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.Optional;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -31,10 +35,13 @@ public class ParkingServiceImplTest {
     private ParkingRepository parkingRepository;
 
     @Mock
-    private Car carMock;
+    private Parking parkingMock;
 
     @Mock
-    private Parking parkingMock;
+    private Car car;
+
+    @Mock
+    private Place place;
 
     @Before
     public void before() {
@@ -42,29 +49,81 @@ public class ParkingServiceImplTest {
     }
 
     @Test
-    public void getOngoingParkings_NoOngoingParkings_EmptyListReturned() {
+    public void isCarAlreadyParked_CarAlreadyParked_TrueReturned() {
         //given
-        String licensePlateNumber = "XYZ123";
-        when(parkingRepository.findByCarLicensePlateNumberAndParkingStatus(licensePlateNumber, ParkingStatus.ONGOING)).thenReturn(Collections.emptyList());
+        String testLicensePlate = "TEST";
+        when(parkingRepository.findByCarLicensePlateNumberAndParkingStatus(testLicensePlate, ParkingStatus.ONGOING)).thenReturn(Collections.singletonList(parkingMock));
 
         //when
-        boolean isCarAlreadyParked = parkingService.isCarAlreadyParked(licensePlateNumber);
+        boolean isCarAlreadyParked = parkingService.isCarAlreadyParked(testLicensePlate);
+
+        //then
+        assertTrue(isCarAlreadyParked);
+    }
+
+    @Test
+    public void isCarAlreadyParked_CarNotParked_FalseReturned() {
+        //given
+        String testLicensePlate = "TEST";
+        when(parkingRepository.findByCarLicensePlateNumberAndParkingStatus(testLicensePlate, ParkingStatus.ONGOING)).thenReturn(Collections.emptyList());
+
+        //when
+        boolean isCarAlreadyParked = parkingService.isCarAlreadyParked(testLicensePlate);
 
         //then
         assertFalse(isCarAlreadyParked);
     }
 
     @Test
-    public void getOngoingParkings_OngoingParkinsExist_ListOfOngoingParkingsReturned() {
+    public void save_ParkingSaved_SavedReturned() {
         //given
-        String licensePlateNumber = "XYZ123";
-        when(parkingRepository.findByCarLicensePlateNumberAndParkingStatus(licensePlateNumber, ParkingStatus.ONGOING)).thenReturn(Collections.singletonList(parkingMock));
+        when(parkingRepository.save(any())).thenReturn(parkingMock);
 
         //when
-        boolean isCarAlreadyParked = parkingService.isCarAlreadyParked(licensePlateNumber);
+        Parking saved = parkingService.save(new Parking());
 
         //then
-        assertTrue(isCarAlreadyParked);
+        assertEquals(parkingMock, saved);
+    }
+
+    @Test
+    public void findParkingById_ParkingFound_OptionalWithParkingReturned() {
+        //given
+        long testId = 1L;
+        when(parkingRepository.findById(testId)).thenReturn(Optional.of(parkingMock));
+
+        //when
+        Optional<Parking> parkingOptional = parkingService.findParkingById(testId);
+
+        //then
+        assertEquals(parkingMock, parkingOptional.get());
+    }
+
+    @Test
+    public void findParkingById_ParkingNotFound_EmptyOptionalReturned() {
+        //given
+        long testId = 1L;
+        when(parkingRepository.findById(testId)).thenReturn(Optional.empty());
+
+        //when
+        Optional<Parking> parkingOptional = parkingService.findParkingById(testId);
+
+        //then
+        assertFalse(parkingOptional.isPresent());
+    }
+
+    @Test
+    public void stopParking_ParkingPassed_UpdatedparkingReturned() {
+        //given
+        Parking parking = new Parking(car, place);
+
+        //when
+        LocalDateTime stopTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        Parking stopped = parkingService.stopParkingAtTime(parking, stopTime);
+
+        //then
+        assertEquals(stopTime, stopped.getStopTime());
+        assertEquals(ParkingStatus.COMPLETED, stopped.getParkingStatus());
     }
 
     @TestConfiguration

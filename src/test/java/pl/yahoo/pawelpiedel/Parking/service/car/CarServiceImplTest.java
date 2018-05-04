@@ -15,8 +15,7 @@ import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
 import pl.yahoo.pawelpiedel.Parking.repository.CarRepository;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -80,6 +79,33 @@ public class CarServiceImplTest {
         assertEquals(id, car.getId());
         assertEquals(licensePlateNumber, car.getLicensePlateNumber());
         assertEquals(driver, car.getDriver());
+    }
+
+    @Test
+    public void isUnknown_CarIsUnknown_TrueReturned() {
+        //given
+        Car car = new Car(null, "TEST_PLATE");
+
+        //when
+        boolean isUnknown = carService.isUnknown(car);
+
+        //then
+        assertTrue(isUnknown);
+    }
+
+    @Test
+    public void isUnknown_CarIsKnown_FalseReturned() {
+        //given
+        Driver driver = new Driver(DriverType.REGULAR);
+        driver.setId(1L);
+        Car car = new Car(driver, "TEST_PLATE");
+        car.setId(1L);
+
+        //when
+        boolean isUnknown = carService.isUnknown(car);
+
+        //then
+        assertFalse(isUnknown);
     }
 
 
