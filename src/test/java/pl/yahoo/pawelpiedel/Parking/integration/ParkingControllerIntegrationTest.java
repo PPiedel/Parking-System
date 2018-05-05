@@ -140,6 +140,7 @@ public class ParkingControllerIntegrationTest {
         ResultActions resultActions = mockMvc.perform(patch(location)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(parkingStopDTO)));
+        logger.info(asJsonString(parkingStopDTO));
 
         //then
         MvcResult stopResult = resultActions

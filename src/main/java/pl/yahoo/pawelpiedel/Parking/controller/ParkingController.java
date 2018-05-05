@@ -114,15 +114,19 @@ public class ParkingController {
         if (parkingOptional.isPresent()) {
             Parking parking = parkingOptional.get();
 
-            parkingService.stopParkingAtTime(parking, stopTime);
-            parkingService.save(parking);
+            if (stopTime.isAfter(parking.getStartTime())){
+                parkingService.stopParkingAtTime(parking, stopTime);
+                parkingService.save(parking);
 
-            paymentService.assignPaymentInGivenCurrency(parking, currencyType);
+                paymentService.assignPaymentInGivenCurrency(parking, currencyType);
 
-            Place released = placeService.releasePlace(parking.getPlace());
-            placeService.save(released);
-
-            return ResponseEntity.ok(parking);
+                Place released = placeService.releasePlace(parking.getPlace());
+                placeService.save(released);
+                return ResponseEntity.ok(entityDTOMapper.asDTO(parking));
+            }
+            else {
+                return ResponseEntity.badRequest().build();
+            }
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -136,7 +140,7 @@ public class ParkingController {
 
         return parkingOptional
                 .map(Parking::getPayment)
-                .map(payment -> new ResponseEntity<>(entityDTOMapper.asDTo(payment), HttpStatus.OK))
+                .map(payment -> new ResponseEntity<>(entityDTOMapper.asDTO(payment), HttpStatus.OK))
                 .orElseGet(() -> ResponseEntity.notFound().build());
 
     }

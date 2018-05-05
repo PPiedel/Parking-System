@@ -89,7 +89,7 @@ public class EntityDTOMapperTest {
         car.addParking(parking);
 
         //when
-        PaymentDTO paymentDTO = entityDTOMapper.asDTo(parking.getPayment());
+        PaymentDTO paymentDTO = entityDTOMapper.asDTO(parking.getPayment());
 
         //then
         assertEquals(payment.getMoney().getCurrency(), paymentDTO.getMoney().getCurrency());

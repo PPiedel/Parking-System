@@ -35,6 +35,7 @@ public class ParkingServiceImpl implements ParkingService {
 
     @Override
     public Parking stopParkingAtTime(Parking parking, LocalDateTime stopTime) {
+        assert stopTime.isAfter(parking.getStartTime());
         parking.setStopTime(stopTime);
         parking.setParkingStatus(ParkingStatus.COMPLETED);
         return parking;

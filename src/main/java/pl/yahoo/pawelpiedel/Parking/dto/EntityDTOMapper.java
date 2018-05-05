@@ -4,6 +4,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
+import pl.yahoo.pawelpiedel.Parking.domain.parking.Parking;
 import pl.yahoo.pawelpiedel.Parking.domain.payment.Payment;
 import pl.yahoo.pawelpiedel.Parking.service.car.CarService;
 
@@ -27,8 +28,12 @@ public class EntityDTOMapper {
         return entity;
     }
 
-    public PaymentDTO asDTo(Payment payment) {
+    public PaymentDTO asDTO(Payment payment) {
         return modelMapper.map(payment, PaymentDTO.class);
+    }
+
+    public ParkingDTO asDTO(Parking parking){
+        return modelMapper.map(parking,ParkingDTO.class);
     }
 
 
