@@ -38,7 +38,7 @@ public class Parking {
     private LocalDateTime stopTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "driver_type")
+    @Column(name = "parking_status")
     private ParkingStatus parkingStatus;
 
     public Parking() {
