@@ -4,6 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.DriverType;
@@ -19,6 +20,7 @@ public class ParkingApplication {
 	}
 
 	@Bean
+	@Profile("!test")
 	public CommandLineRunner loadData(DriverRepository repository) {
 		return (args) -> {
 		    Driver regular = new Driver(DriverType.REGULAR);

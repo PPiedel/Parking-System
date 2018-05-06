@@ -18,6 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -59,6 +60,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@ActiveProfiles("test")
 public class ParkingControllerTest {
     private static final Logger logger = LoggerFactory.getLogger(ParkingControllerTest.class);
     private static final String API_BASE_URL = "/api/parking";
@@ -231,14 +233,15 @@ public class ParkingControllerTest {
         Car car = new Car(driver, licensePlateNumber);
         driver.setCars(Collections.singletonList(car));
         Long testId = 1L;
-        LocalDateTime localDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         Place place = new Place(PlaceStatus.TAKEN);
         Parking parking = new Parking(car, place);
         parking.setId(testId);
 
-        ParkingStopDTO parkingStopDTO = new ParkingStopDTO(localDateTime.toString(), DEFAULT_CURRENCY);
         Parking updated = new Parking(car, place);
-        updated.setId(testId);
+
+        LocalDateTime stopTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        ParkingStopDTO parkingStopDTO = new ParkingStopDTO(stopTime.toString(), DEFAULT_CURRENCY);
+
         updated.setStopTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         when(parkingService.findParkingById(testId)).thenReturn(Optional.of(updated));
 

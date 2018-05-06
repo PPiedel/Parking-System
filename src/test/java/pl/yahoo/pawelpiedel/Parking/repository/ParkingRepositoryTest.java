@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import pl.yahoo.pawelpiedel.Parking.domain.Car;
 import pl.yahoo.pawelpiedel.Parking.domain.driver.Driver;
@@ -22,7 +23,7 @@ import static org.hamcrest.Matchers.hasSize;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-
+@ActiveProfiles("test")
 public class ParkingRepositoryTest {
     @Autowired
     private ParkingRepository parkingRepository;
