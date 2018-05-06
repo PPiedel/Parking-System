@@ -79,6 +79,14 @@ public class Car {
         this.driver = driver;
     }
 
+    public Parking getLastAddedParking() {
+        Parking parking = null;
+        if (parkings != null && !parkings.isEmpty()) {
+            parking = parkings.get(parkings.size() - 1);
+        }
+        return parking;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

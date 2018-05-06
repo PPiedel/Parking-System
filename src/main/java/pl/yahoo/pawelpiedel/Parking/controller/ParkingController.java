@@ -67,20 +67,30 @@ public class ParkingController {
             createParking(car, place);
 
             if (carService.isUnknown(car)) {
-                Driver newDriver = new Driver(DriverType.REGULAR);
-                assignCarToDriver(car, newDriver);
-                Driver saved = driverService.save(newDriver);
-                URI location = buildUri(getLastAddedParking(saved.getCars().get(0)));
+                Driver newDriver = createDriverWithCar(car);
+                Driver savedDriver = driverService.save(newDriver);
+                URI location = buildUri(savedDriver.getFirstCar().getLastAddedParking());
                 return ResponseEntity.created(location).build();
 
             } else {
-                Car saved = carService.save(car);
-                URI location = buildUri(getLastAddedParking(saved));
+                Car savedCar = carService.save(car);
+                URI location = buildUri(savedCar.getLastAddedParking());
                 return ResponseEntity.created(location).build();
             }
 
         }
 
+    }
+
+    private Driver createDriverWithCar(Car car) {
+        Driver newDriver = driverService.createNewDriver(DriverType.REGULAR);
+        assignCarToDriver(car, newDriver);
+        return newDriver;
+    }
+
+    private void assignCarToDriver(Car car, Driver newDriver) {
+        newDriver.setCars(Collections.singletonList(car));
+        car.setDriver(newDriver);
     }
 
     private void createParking(Car car, Place place) {
@@ -95,26 +105,16 @@ public class ParkingController {
                 .buildAndExpand(parking.getId()).toUri();
     }
 
-    private void assignCarToDriver(Car car, Driver newDriver) {
-        newDriver.setCars(Collections.singletonList(car));
-        car.setDriver(newDriver);
-    }
-
-    private Parking getLastAddedParking(Car car) {
-        return car.getParkings().get(car.getParkings().size() - 1);
-    }
-
     @PatchMapping(value = "/{id}")
     public ResponseEntity<?> stopParkingMeter(@RequestBody @Valid ParkingStopDTO parkingStopDTO, @PathVariable("id") Long id) {
         LocalDateTime stopTime = LocalDateTime.parse(parkingStopDTO.getStopTime());
         CurrencyType currencyType = CurrencyType.valueOf(parkingStopDTO.getCurrencyType());
-        //TODO currency validation
 
         Optional<Parking> parkingOptional = parkingService.findParkingById(id);
         if (parkingOptional.isPresent()) {
             Parking parking = parkingOptional.get();
 
-            if (stopTime.isAfter(parking.getStartTime())){
+            if (stopTimeIsGreaterOrEqualStartTime(stopTime, parking)) {
                 parkingService.stopParkingAtTime(parking, stopTime);
                 parkingService.save(parking);
 
@@ -132,6 +132,10 @@ public class ParkingController {
         }
 
 
+    }
+
+    private boolean stopTimeIsGreaterOrEqualStartTime(LocalDateTime stopTime, Parking parking) {
+        return stopTime.isAfter(parking.getStartTime()) || stopTime.isEqual(parking.getStartTime());
     }
 
     @GetMapping(value = "/{id}/payment")

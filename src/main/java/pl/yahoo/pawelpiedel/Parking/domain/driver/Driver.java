@@ -57,6 +57,14 @@ public class Driver {
         this.cars = cars;
     }
 
+    public Car getFirstCar() {
+        Car car = null;
+        if (cars != null && !cars.isEmpty()) {
+            car = cars.get(0);
+        }
+        return car;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
