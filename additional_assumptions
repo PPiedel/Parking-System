@@ -1,0 +1,4 @@
+Assumptions :
+- Driver can not start park meter if there is no available places
+- Parking fee is charged per minute
+- fee calculation may differ in different currencies (in the future)
